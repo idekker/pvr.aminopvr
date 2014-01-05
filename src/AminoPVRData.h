@@ -161,7 +161,7 @@ private:
     PVR_ERROR  GetGeneralConfig();
 
     CStdString ConstructUrl( const CStdString aPath, bool aUseApiKey=true );
-    bool       AminoPVRData::GrabAndParse( const CStdString aUrl, Json::Value & aResponse, bool aExpectData=true );
+    bool       GrabAndParse( const CStdString aUrl, Json::Value & aResponse, bool aExpectData=true );
     bool       ParseResponse( CStdString aJsonString, Json::Value & aJson, bool aExpectData=true );
 
     void       CreateRecordingEntry( Json::Value aJson, AminoPVRRecording & aRecording );
