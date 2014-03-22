@@ -80,7 +80,7 @@ void ADDON_ReadSettings(void)
     g_iPort = DEFAULT_PORT;
   }
 
-  /* Read setting "db_username" from settings.xml */
+  /* Read setting "api_key" from settings.xml */
   if (XBMC->GetSetting("api_key", buffer))
     g_szApiKey = buffer;
   else
@@ -88,6 +88,14 @@ void ADDON_ReadSettings(void)
     /* If setting is unknown fallback to defaults */
     XBMC->Log(LOG_ERROR, "Couldn't get 'api_key' setting, falling back to '%s' as default", DEFAULT_API_KEY);
     g_szApiKey = DEFAULT_API_KEY;
+  }
+
+  /* Read setting "use_http_streams" from settings.xml */
+  if (!XBMC->GetSetting("use_http_streams", &g_UseHttpStreams))
+  {
+    /* If setting is unknown fallback to defaults */
+    XBMC->Log(LOG_ERROR, "Couldn't get 'use_http_streams' setting, falling back to '%i' as default", false);
+    g_UseHttpStreams = false;
   }
   buffer[0] = 0;
 }
@@ -206,6 +214,15 @@ ADDON_STATUS ADDON_SetSetting(const char *settingName, const void *settingValue)
     g_szApiKey = (const char*)settingValue;
     if (tmp_sApiKey != g_szApiKey)
       return ADDON_STATUS_NEED_RESTART;
+  }
+  else if (str == "use_http_streams")
+  {
+    XBMC->Log(LOG_INFO, "Changed Setting 'use_http_streams' from %u to %u", g_UseHttpStreams, *(bool*)settingValue);
+    if (g_UseHttpStreams != *(bool*)settingValue)
+    {
+      g_UseHttpStreams = *(bool*)settingValue;
+      return ADDON_STATUS_NEED_RESTART;
+    }
   }
   return ADDON_STATUS_OK;
 }

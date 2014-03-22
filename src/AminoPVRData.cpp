@@ -36,6 +36,21 @@ bool CCurlFile::Get( const CStdString & aUrl, CStdString & aResult )
     return false;
 }
 
+bool CCurlFile::Post( const CStdString & aUrl, const CStdString & aArguments, CStdString & aResult )
+{
+    void * lpFileHandle = XBMC->OpenFileForWrite( aUrl.c_str(), true );
+    if ( lpFileHandle )
+    {
+        char lpBuffer[1024];
+        XBMC->WriteFile( lpFileHandle, aArguments.c_str(), aArguments.length() );
+        while ( XBMC->ReadFileString( lpFileHandle, lpBuffer, 1024 ) )
+            aResult.append( lpBuffer );
+        XBMC->CloseFile( lpFileHandle );
+        return true;
+    }
+    return false;
+}
+
 AminoPVRData::AminoPVRData( void )
   : ivCategories()
 {
@@ -136,14 +151,7 @@ PVR_ERROR AminoPVRData::GetChannels( ADDON_HANDLE aHandle, bool aRadio )
             AminoPVRChannel lChannel;
             PVR_CHANNEL     lTag;
 
-            lChannel.Id         = lResponse[lIndex]["id"].asInt();
-            lChannel.EpgId      = lResponse[lIndex]["epg_id"].asString();
-            lChannel.Number     = lResponse[lIndex]["number"].asInt();
-            lChannel.Name       = lResponse[lIndex]["name"].asString();
-            lChannel.Url        = lResponse[lIndex]["url"].asString();
-            lChannel.LogoPath   = ConstructUrl( lResponse[lIndex]["logo_path"].asString(), true );
-            lChannel.Radio      = false;
-            lChannel.EpgEntries.clear();
+            CreateChannelEntry( lResponse[lIndex], lChannel );
 
             memset( &lTag, 0 , sizeof( lTag ) );
 
@@ -447,18 +455,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
         {
             AminoPVRSchedule lSchedule;
 
-            lSchedule.Id                   = lResponse[lIndex]["id"].asInt();
-            lSchedule.Type                 = (ScheduleType)lResponse[lIndex]["type"].asInt();
-            lSchedule.ChannelId            = lResponse[lIndex]["channel_id"].asInt();
-            lSchedule.StartTime            = lResponse[lIndex]["start_time"].asInt();
-            lSchedule.EndTime              = lResponse[lIndex]["end_time"].asInt();
-            lSchedule.Title                = lResponse[lIndex]["title"].asString();
-            lSchedule.PreferHd             = lResponse[lIndex]["prefer_hd"].asBool();
-            lSchedule.PreferUnscrambled    = lResponse[lIndex]["prefer_unscrambled"].asBool();
-            lSchedule.DupMethod            = (DuplicationType)lResponse[lIndex]["dup_method"].asInt();
-            lSchedule.StartEarly           = lResponse[lIndex]["start_early"].asInt();
-            lSchedule.EndLate              = lResponse[lIndex]["end_late"].asInt();
-            lSchedule.Inactive             = lResponse[lIndex]["inactive"].asBool();
+            CreateScheduleEntry( lResponse[lIndex], lSchedule );
 
             XBMC->Log( LOG_DEBUG, "Found schedule: %s, Unique id: %d\n", lSchedule.Title.c_str(), lSchedule.Id );
 
@@ -612,6 +609,67 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
 PVR_ERROR AminoPVRData::AddTimer( const PVR_TIMER & aTimer )
 {
     XBMC->Log( LOG_DEBUG, "%s( %d )", __FUNCTION__, aTimer.iClientIndex );
+
+    AminoPVRSchedule lSchedule;
+
+    lSchedule.Id            = -1;
+    lSchedule.Type          = SCHEDULE_TYPE_ONCE;
+
+    // TODO: If no program exists from startime to endtime, then it is a manual recording
+    // TODO: Check value of iWeekdays and bIsRepeating
+    if ( aTimer.bIsRepeating )
+    {
+        switch ( aTimer.iWeekdays )
+        {
+            case 0x40:  // Sunday
+            case 0x20:  // Saturday
+            case 0x10:  // Friday
+            case 0x08:  // Thursday
+            case 0x04:  // Wednesday
+            case 0x02:  // Tuesday
+            case 0x01:  // Monday
+                lSchedule.Type = SCHEDULE_TYPE_ONCE_EVERY_WEEK;
+                break;
+            case 0x1F:  // Weekdays
+                lSchedule.Type = SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY;
+                break;
+            case 0x60:  // Weekends
+                lSchedule.Type = SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND;
+                break;
+            case 0x7F:
+                lSchedule.Type = SCHEDULE_TYPE_ONCE_EVERY_DAY;
+                break;
+            default:
+                lSchedule.Type = SCHEDULE_TYPE_ANY_TIME;
+                break;
+        }
+    }
+
+    lSchedule.Title.Format( "%s", aTimer.strTitle );
+    lSchedule.ChannelId         = aTimer.iClientChannelUid;
+    lSchedule.StartTime         = aTimer.startTime;
+    lSchedule.EndTime           = aTimer.endTime;
+    lSchedule.StartEarly        = aTimer.iMarginStart;
+    lSchedule.EndLate           = aTimer.iMarginEnd;
+    lSchedule.PreferHd          = true;
+    lSchedule.PreferUnscrambled = true;
+    lSchedule.DupMethod         = (DuplicationType)(DUPLICATION_METHOD_TITLE | DUPLICATION_METHOD_SUBTITLE | DUPLICATION_METHOD_DESCRIPTION);
+    lSchedule.Inactive          = false;
+
+    Json::Value         lJson;
+    Json::FastWriter    lWriter;
+    Json::Value         lResponse;
+    Json::Value         lArguments;
+
+    CreateScheduleJson( lSchedule, lJson );
+
+    lArguments["schedule"] = lWriter.write( lJson );
+
+    if ( PostAndParse( ConstructUrl( "/api/schedules/addSchedule" ), lArguments, lResponse, false ) )
+    {
+        return PVR_ERROR_NO_ERROR;
+    }
+
     return PVR_ERROR_SERVER_ERROR;
 }
 
@@ -649,7 +707,14 @@ PVR_ERROR AminoPVRData::UpdateTimer( const PVR_TIMER & aTimer )
 CStdString AminoPVRData::ConstructUrl( const CStdString aPath, bool aUseApiKey )
 {
     CStdString lUrl;
-    lUrl.Format( "http://%s:%i%s?apiKey=%s", g_strHostname.c_str(), g_iPort, aPath.c_str(), g_szApiKey );
+
+    lUrl.Format( "http://%s:%i%s", g_strHostname.c_str(), g_iPort, aPath.c_str() );
+
+    if ( aUseApiKey )
+    {
+        lUrl.AppendFormat( "?apiKey=%s", g_szApiKey );
+    }
+
     return lUrl;
 }
 
@@ -661,6 +726,32 @@ bool AminoPVRData::GrabAndParse( const CStdString aUrl, Json::Value & aResponse,
     if ( !lHttp.Get( aUrl, lJson ) )
     {
         XBMC->Log( LOG_ERROR, "%s: Could not open connection to AminoPVR backend: aUrl=%s\n", __FUNCTION__, aUrl.c_str() );
+    }
+    else
+    {
+        if ( ParseResponse( lJson, aResponse, aExpectData ) )
+        {
+            lResult = true;
+        }
+        else
+        {
+            XBMC->Log( LOG_ERROR, "%s: failed: aUrl=%s, lJson=%s\n", __FUNCTION__, aUrl.c_str(), lJson.c_str() );
+        }
+    }
+
+    return lResult;
+}
+
+bool AminoPVRData::PostAndParse( const CStdString aUrl, Json::Value aArguments, Json::Value & aResponse, bool aExpectData )
+{
+    bool                lResult = false;
+    Json::FastWriter    lWriter;
+    CStdString          lJson;
+    CCurlFile           lHttp;
+
+    if ( !lHttp.Post( aUrl, CStdString( lWriter.write( aArguments ) ), lJson ) )
+    {
+        XBMC->Log( LOG_ERROR, "%s: Could not open connection to AminoPVR backend: aUrl=%s, aArguments=%s\n", __FUNCTION__, aUrl.c_str(), aArguments.toStyledString().c_str() );
     }
     else
     {
@@ -757,6 +848,18 @@ void AminoPVRData::CreateEpgEntry( Json::Value aJson, AminoPVREpgEntry & aEpgEnt
     }
 }
 
+void AminoPVRData::CreateChannelEntry( Json::Value aJson, AminoPVRChannel & aChannel )
+{
+    aChannel.Id         = aJson["id"].asInt();
+    aChannel.EpgId      = aJson["epg_id"].asString();
+    aChannel.Number     = aJson["number"].asInt();
+    aChannel.Name       = aJson["name"].asString();
+    aChannel.Url        = aJson["url"].asString();
+    aChannel.LogoPath   = ConstructUrl( aJson["logo_path"].asString(), true );
+    aChannel.Radio      = false;
+    aChannel.EpgEntries.clear();
+}
+
 void AminoPVRData::CreateRecordingEntry( Json::Value aJson, AminoPVRRecording & aRecording )
 {
     aRecording.Id           = aJson["id"].asInt();
@@ -782,4 +885,36 @@ void AminoPVRData::CreateRecordingEntry( Json::Value aJson, AminoPVRRecording & 
     {
         aRecording.EpgEntry.Title = aJson["title"].asString();
     }
+}
+
+void AminoPVRData::CreateScheduleEntry( Json::Value aJson, AminoPVRSchedule & aSchedule )
+{
+    aSchedule.Id                   = aJson["id"].asInt();
+    aSchedule.Type                 = (ScheduleType)aJson["type"].asInt();
+    aSchedule.ChannelId            = aJson["channel_id"].asInt();
+    aSchedule.StartTime            = aJson["start_time"].asInt();
+    aSchedule.EndTime              = aJson["end_time"].asInt();
+    aSchedule.Title                = aJson["title"].asString();
+    aSchedule.PreferHd             = aJson["prefer_hd"].asBool();
+    aSchedule.PreferUnscrambled    = aJson["prefer_unscrambled"].asBool();
+    aSchedule.DupMethod            = (DuplicationType)aJson["dup_method"].asInt();
+    aSchedule.StartEarly           = aJson["start_early"].asInt();
+    aSchedule.EndLate              = aJson["end_late"].asInt();
+    aSchedule.Inactive             = aJson["inactive"].asBool();
+}
+
+void AminoPVRData::CreateScheduleJson( AminoPVRSchedule aSchedule, Json::Value & aJson )
+{
+    aJson["id"]                 = Json::Value( aSchedule.Id );
+    aJson["type"]               = Json::Value( aSchedule.Type );
+    aJson["channel_id"]         = Json::Value( aSchedule.ChannelId );
+    aJson["start_time"]         = Json::Value( aSchedule.StartTime );
+    aJson["end_time"]           = Json::Value( aSchedule.EndTime );
+    aJson["title"]              = Json::Value( aSchedule.Title.c_str() );
+    aJson["prefer_hd"]          = Json::Value( aSchedule.PreferHd );
+    aJson["prefer_unscrambled"] = Json::Value( aSchedule.PreferUnscrambled );
+    aJson["dup_method"]         = Json::Value( aSchedule.DupMethod );
+    aJson["start_early"]        = Json::Value( aSchedule.StartEarly );
+    aJson["end_late"]           = Json::Value( aSchedule.EndLate );
+    aJson["inactive"]           = Json::Value( aSchedule.Inactive );
 }

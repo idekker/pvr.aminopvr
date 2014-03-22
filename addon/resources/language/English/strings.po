@@ -29,3 +29,7 @@ msgstr ""
 msgctxt "#30002"
 msgid "AminoPVR Api Key"
 msgstr ""
+
+msgctxt "#30003"
+msgid "Use HTTP Streams"
+msgstr ""

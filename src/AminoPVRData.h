@@ -20,6 +20,7 @@
  *
  */
 
+#include <map>
 #include <vector>
 #include <json/json.h>
 #include "platform/util/StdString.h"
@@ -130,6 +131,7 @@ public:
     ~CCurlFile( void ) {};
 
     bool Get( const CStdString & aUrl, CStdString & aResult );
+    bool Post( const CStdString & aUrl, const CStdString & aArguments, CStdString & aResult );
 };
 
 class AminoPVRData
@@ -162,10 +164,14 @@ private:
 
     CStdString ConstructUrl( const CStdString aPath, bool aUseApiKey=true );
     bool       GrabAndParse( const CStdString aUrl, Json::Value & aResponse, bool aExpectData=true );
+    bool       PostAndParse( const CStdString aUrl, Json::Value aArguments, Json::Value & aResponse, bool aExpectData=true );
     bool       ParseResponse( CStdString aJsonString, Json::Value & aJson, bool aExpectData=true );
 
+    void       CreateChannelEntry( Json::Value aJson, AminoPVRChannel & aChannel );
     void       CreateRecordingEntry( Json::Value aJson, AminoPVRRecording & aRecording );
     void       CreateEpgEntry( Json::Value aJson, AminoPVREpgEntry & aEpgEntry );
+    void       CreateScheduleEntry( Json::Value aJson, AminoPVRSchedule & aSchedule );
+    void       CreateScheduleJson( AminoPVRSchedule aSchedule, Json::Value & aJson );
 
     // Categories
     Categories                      ivCategories;
