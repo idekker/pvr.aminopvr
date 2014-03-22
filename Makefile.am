@@ -10,7 +10,7 @@ ADDONNAME       = pvr.aminopvr
 LIBNAME         = libaminopvr-addon
 lib_LTLIBRARIES = libaminopvr-addon.la
 
-LIBS            = @abs_top_srcdir@/lib/jsoncpp/libjsoncpp.la
+LIBS            = @abs_top_builddir@/lib/jsoncpp/libjsoncpp.la
 
 include ../Makefile.include.am
 

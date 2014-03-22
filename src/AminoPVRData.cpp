@@ -712,7 +712,7 @@ CStdString AminoPVRData::ConstructUrl( const CStdString aPath, bool aUseApiKey )
 
     if ( aUseApiKey )
     {
-        lUrl.AppendFormat( "?apiKey=%s", g_szApiKey );
+        lUrl.AppendFormat( "?apiKey=%s", g_szApiKey.c_str() );
     }
 
     return lUrl;
@@ -908,8 +908,8 @@ void AminoPVRData::CreateScheduleJson( AminoPVRSchedule aSchedule, Json::Value &
     aJson["id"]                 = Json::Value( aSchedule.Id );
     aJson["type"]               = Json::Value( aSchedule.Type );
     aJson["channel_id"]         = Json::Value( aSchedule.ChannelId );
-    aJson["start_time"]         = Json::Value( aSchedule.StartTime );
-    aJson["end_time"]           = Json::Value( aSchedule.EndTime );
+    aJson["start_time"]         = Json::Value( (int)aSchedule.StartTime );
+    aJson["end_time"]           = Json::Value( (int)aSchedule.EndTime );
     aJson["title"]              = Json::Value( aSchedule.Title.c_str() );
     aJson["prefer_hd"]          = Json::Value( aSchedule.PreferHd );
     aJson["prefer_unscrambled"] = Json::Value( aSchedule.PreferUnscrambled );
