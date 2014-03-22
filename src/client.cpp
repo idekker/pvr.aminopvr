@@ -229,10 +229,16 @@ ADDON_STATUS ADDON_SetSetting(const char *settingName, const void *settingValue)
 
 void ADDON_Stop()
 {
+  ADDON_Destroy();
 }
 
 void ADDON_FreeSettings()
 {
+}
+
+void ADDON_Announce(const char *flag, const char *sender, const char *message, const void *data)
+{
+  (void) flag; (void) sender; (void) message; (void) data;
 }
 
 /***********************************************************
@@ -249,6 +255,18 @@ const char* GetMininumPVRAPIVersion(void)
 {
   static const char *strMinApiVersion = XBMC_PVR_MIN_API_VERSION;
   return strMinApiVersion;
+}
+
+const char* GetGUIAPIVersion(void)
+{
+  static const char *strGuiApiVersion = XBMC_GUI_API_VERSION;
+  return strGuiApiVersion;
+}
+
+const char* GetMininumGUIAPIVersion(void)
+{
+  static const char *strMinGuiApiVersion = XBMC_GUI_MIN_API_VERSION;
+  return strMinGuiApiVersion;
 }
 
 PVR_ERROR GetAddonCapabilities(PVR_ADDON_CAPABILITIES* pCapabilities)
@@ -434,7 +452,7 @@ PVR_ERROR UpdateTimer( const PVR_TIMER & timer )
 
 /** UNUSED API FUNCTIONS */
 PVR_ERROR DialogChannelScan(void) { return PVR_ERROR_NOT_IMPLEMENTED; }
-PVR_ERROR CallMenuHook(const PVR_MENUHOOK &menuhook) { return PVR_ERROR_NOT_IMPLEMENTED; }
+PVR_ERROR CallMenuHook(const PVR_MENUHOOK &menuhook, const PVR_MENUHOOK_DATA &item) { return PVR_ERROR_NOT_IMPLEMENTED; }
 PVR_ERROR DeleteChannel(const PVR_CHANNEL &channel) { return PVR_ERROR_NOT_IMPLEMENTED; }
 PVR_ERROR RenameChannel(const PVR_CHANNEL &channel) { return PVR_ERROR_NOT_IMPLEMENTED; }
 PVR_ERROR MoveChannel(const PVR_CHANNEL &channel) { return PVR_ERROR_NOT_IMPLEMENTED; }
@@ -456,6 +474,7 @@ long long SeekLiveStream(long long iPosition, int iWhence /* = SEEK_SET */) { re
 long long PositionLiveStream(void) { return -1; }
 long long LengthLiveStream(void) { return -1; }
 const char * GetLiveStreamURL(const PVR_CHANNEL &channel) { return ""; }
+PVR_ERROR GetRecordingEdl(const PVR_RECORDING&, PVR_EDL_ENTRY[], int*) { return PVR_ERROR_NOT_IMPLEMENTED; };
 PVR_ERROR RenameRecording(const PVR_RECORDING &recording) { return PVR_ERROR_NOT_IMPLEMENTED; }
 PVR_ERROR SetRecordingPlayCount(const PVR_RECORDING &recording, int count) { return PVR_ERROR_NOT_IMPLEMENTED; }
 void DemuxAbort(void) {}
@@ -466,4 +485,7 @@ bool CanPauseStream(void) { return false; }
 bool CanSeekStream(void) { return false; }
 bool SeekTime(int,bool,double*) { return false; }
 void SetSpeed(int) {};
+time_t GetPlayingTime() { return 0; }
+time_t GetBufferTimeStart() { return 0; }
+time_t GetBufferTimeEnd() { return 0; }
 }
