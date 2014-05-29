@@ -139,7 +139,7 @@ PVR_ERROR AminoPVRData::GetChannels( ADDON_HANDLE aHandle, bool aRadio )
 
     Json::Value lResponse;
 
-    if ( GrabAndParse( ConstructUrl( "/api/channels/getChannelList" ), lResponse ) )
+    if ( GrabAndParse( ConstructUrl( "/api/channels/getChannelList", g_SdOnly ? "includeHd=False" : "" ), lResponse ) )
     {
         int lSize = lResponse.size();
 
@@ -704,7 +704,7 @@ PVR_ERROR AminoPVRData::UpdateTimer( const PVR_TIMER & aTimer )
     return PVR_ERROR_SERVER_ERROR;
 }
 
-CStdString AminoPVRData::ConstructUrl( const CStdString aPath, bool aUseApiKey )
+CStdString AminoPVRData::ConstructUrl( const CStdString aPath, const CStdString aArguments, bool aUseApiKey )
 {
     CStdString lUrl;
 
@@ -714,6 +714,18 @@ CStdString AminoPVRData::ConstructUrl( const CStdString aPath, bool aUseApiKey )
     {
         lUrl.AppendFormat( "?apiKey=%s", g_szApiKey.c_str() );
     }
+    if ( aArguments != "" )
+    {
+        if ( aUseApiKey )
+        {
+            lUrl.AppendFormat( "&%s", aArguments );
+        }
+        else
+        {
+            lUrl.AppendFormat( "?%s", aArguments );
+        }
+    }
+
 
     return lUrl;
 }
@@ -855,7 +867,7 @@ void AminoPVRData::CreateChannelEntry( Json::Value aJson, AminoPVRChannel & aCha
     aChannel.Number     = aJson["number"].asInt();
     aChannel.Name       = aJson["name"].asString();
     aChannel.Url        = aJson["url"].asString();
-    aChannel.LogoPath   = ConstructUrl( aJson["logo_path"].asString(), true );
+    aChannel.LogoPath   = ConstructUrl( aJson["logo_path"].asString() );
     aChannel.Radio      = false;
     aChannel.EpgEntries.clear();
 }

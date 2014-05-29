@@ -36,6 +36,7 @@ extern std::string              g_strHostname;      ///< The Host name or IP of 
 extern int                      g_iPort;            ///< The AminoPVR Port (default is 8080)
 extern std::string              g_szApiKey;         ///< The AminoPVR Api Key (default is empty)
 extern bool                     g_UseHttpStreams;   ///< Use HTTP if TRUE, else use RTSP streams for recordings
+extern bool                     g_SdOnly;           ///< Use SD streams only
 
 extern ADDON::CHelper_libXBMC_addon *XBMC;
 extern CHelper_libXBMC_pvr          *PVR;

@@ -45,6 +45,7 @@ std::string g_strHostname     = DEFAULT_HOST;             ///< The Host name or 
 int         g_iPort           = DEFAULT_PORT;             ///< The AminoPVR Port (default is 8080)
 std::string g_szApiKey        = DEFAULT_API_KEY;          ///< The AminoPVR Api Key (default is empty)
 bool        g_UseHttpStreams  = false;
+bool        g_SdOnly          = false;
 std::string g_strUserPath     = "";
 std::string g_strClientPath   = "";
 
@@ -96,6 +97,14 @@ void ADDON_ReadSettings(void)
     /* If setting is unknown fallback to defaults */
     XBMC->Log(LOG_ERROR, "Couldn't get 'use_http_streams' setting, falling back to '%i' as default", false);
     g_UseHttpStreams = false;
+  }
+
+  /* Read setting "sd_only" from settings.xml */
+  if (!XBMC->GetSetting("sd_only", &g_SdOnly))
+  {
+    /* If setting is unknown fallback to defaults */
+    XBMC->Log(LOG_ERROR, "Couldn't get 'sd_only' setting, falling back to '%i' as default", false);
+    g_SdOnly = false;
   }
   buffer[0] = 0;
 }
@@ -221,6 +230,15 @@ ADDON_STATUS ADDON_SetSetting(const char *settingName, const void *settingValue)
     if (g_UseHttpStreams != *(bool*)settingValue)
     {
       g_UseHttpStreams = *(bool*)settingValue;
+      return ADDON_STATUS_NEED_RESTART;
+    }
+  }
+  else if (str == "sd_only")
+  {
+    XBMC->Log(LOG_INFO, "Changed Setting 'sd_only' from %u to %u", g_SdOnly, *(bool*)settingValue);
+    if (g_SdOnly != *(bool*)settingValue)
+    {
+      g_SdOnly = *(bool*)settingValue;
       return ADDON_STATUS_NEED_RESTART;
     }
   }

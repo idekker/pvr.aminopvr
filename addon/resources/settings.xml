@@ -4,4 +4,5 @@
   <setting id="port" type="number" label="30001" default="8080" />
   <setting id="api_key" type="text" label="30002" default="secret" />
   <setting id="use_http_streams" type="bool" label="30003" default="true" />
+  <setting id="sd_only" type="bool" label="30004" default="false" />
 </settings>
