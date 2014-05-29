@@ -162,7 +162,7 @@ protected:
 private:
     PVR_ERROR  GetGeneralConfig();
 
-    CStdString ConstructUrl( const CStdString aPath, const CStdString aArguments="", bool aUseApiKey=true );
+    CStdString ConstructUrl( const CStdString aPath, CStdString aArguments="", bool aUseApiKey=true );
     bool       GrabAndParse( const CStdString aUrl, Json::Value & aResponse, bool aExpectData=true );
     bool       PostAndParse( const CStdString aUrl, Json::Value aArguments, Json::Value & aResponse, bool aExpectData=true );
     bool       ParseResponse( CStdString aJsonString, Json::Value & aJson, bool aExpectData=true );

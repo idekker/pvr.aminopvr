@@ -704,7 +704,7 @@ PVR_ERROR AminoPVRData::UpdateTimer( const PVR_TIMER & aTimer )
     return PVR_ERROR_SERVER_ERROR;
 }
 
-CStdString AminoPVRData::ConstructUrl( const CStdString aPath, const CStdString aArguments, bool aUseApiKey )
+CStdString AminoPVRData::ConstructUrl( const CStdString aPath, CStdString aArguments, bool aUseApiKey )
 {
     CStdString lUrl;
 
