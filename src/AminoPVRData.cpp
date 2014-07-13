@@ -162,16 +162,15 @@ PVR_ERROR AminoPVRData::GetChannels( ADDON_HANDLE aHandle, bool aRadio )
 
             strncpy( lTag.strChannelName, lChannel.Name.c_str(),     sizeof( lTag.strChannelName ) );
             strncpy( lTag.strIconPath,    lChannel.LogoPath.c_str(), sizeof( lTag.strIconPath ) );
-            strncpy( lTag.strStreamURL,   lChannel.Url.c_str(),      sizeof( lTag.strStreamURL ) );
 
-            if ( lChannel.Url.compare( 0, 1, "/" ) == 0 )
+//            if ( lChannel.Url.compare( 0, 1, "/" ) == 0 )
             {
                 strncpy( lTag.strStreamURL, ConstructUrl( lChannel.Url, g_SdOnly ? "includeHd=False" : "" ).c_str(), sizeof( lTag.strStreamURL ) );
             }
-            else
-            {
-                strncpy( lTag.strStreamURL, lChannel.Url.c_str(), sizeof( lTag.strStreamURL ) );
-            }
+//            else
+//            {
+//                strncpy( lTag.strStreamURL, lChannel.Url.c_str(), sizeof( lTag.strStreamURL ) );
+//            }
 
             if ( !lTag.bIsRadio )
             {
