@@ -164,6 +164,15 @@ PVR_ERROR AminoPVRData::GetChannels( ADDON_HANDLE aHandle, bool aRadio )
             strncpy( lTag.strIconPath,    lChannel.LogoPath.c_str(), sizeof( lTag.strIconPath ) );
             strncpy( lTag.strStreamURL,   lChannel.Url.c_str(),      sizeof( lTag.strStreamURL ) );
 
+            if ( lChannel.Url.compare( 0, 1, "/" ) == 0 )
+            {
+                strncpy( lTag.strStreamURL, ConstructUrl( lChannel.Url, g_SdOnly ? "includeHd=False" : "" ).c_str(), sizeof( lTag.strStreamURL ) );
+            }
+            else
+            {
+                strncpy( lTag.strStreamURL, lChannel.Url.c_str(), sizeof( lTag.strStreamURL ) );
+            }
+
             if ( !lTag.bIsRadio )
             {
                 XBMC->Log( LOG_DEBUG, "Found TV channel: %s, Unique id: %d, Backend channel: %d\n", lChannel.Name.c_str(), lTag.iUniqueId, lTag.iChannelNumber );
