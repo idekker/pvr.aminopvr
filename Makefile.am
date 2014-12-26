@@ -5,7 +5,7 @@
 # how to reach the author.
 #
 
-ADDONBINNAME    = XBMC_AminoPVR
+ADDONBINNAME    = Kodi_AminoPVR
 ADDONNAME       = pvr.aminopvr
 LIBNAME         = libaminopvr-addon
 lib_LTLIBRARIES = libaminopvr-addon.la
