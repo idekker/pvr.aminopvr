@@ -102,7 +102,7 @@ struct AminoPVRRecording
     CStdString          Filename;
     unsigned int        FileSize;
     bool                Scrambled;
-    unsigned int        Marker;
+    int                 Marker;
     RecordingStatus     Status;
     int                 EpgProgramId;
     AminoPVREpgEntry    EpgEntry;
