@@ -176,7 +176,6 @@ bool ADDON_HasSettings()
 
 unsigned int ADDON_GetSettings(ADDON_StructSetting ***sSet)
 {
-  NOTUSED(sSet);
   return 0;
 }
 
@@ -303,11 +302,21 @@ const char *GetConnectionString(void)
   return strConnectionString.c_str();
 }
 
+const char * GetBackendHostname(void)
+{
+    return g_strHostname.c_str();
+}
+
 PVR_ERROR GetDriveSpace(long long *iTotal, long long *iUsed)
 {
   *iTotal = 1024 * 1024 * 1024;
   *iUsed  = 0;
   return PVR_ERROR_NO_ERROR;
+}
+
+PVR_ERROR OpenDialogChannelScan()
+{
+  return PVR_ERROR_NOT_IMPLEMENTED;
 }
 
 PVR_ERROR GetEPGForChannel(ADDON_HANDLE handle, const PVR_CHANNEL &channel, time_t iStart, time_t iEnd)
@@ -332,6 +341,16 @@ PVR_ERROR GetChannels(ADDON_HANDLE handle, bool bRadio)
     return m_data->GetChannels(handle, bRadio);
 
   return PVR_ERROR_SERVER_ERROR;
+}
+
+PVR_ERROR OpenDialogChannelSettings(const PVR_CHANNEL &channelinfo)
+{
+  return PVR_ERROR_NOT_IMPLEMENTED;
+}
+
+PVR_ERROR OpenDialogChannelAdd(const PVR_CHANNEL &channelinfo)
+{
+  return PVR_ERROR_NOT_IMPLEMENTED;
 }
 
 bool OpenLiveStream(const PVR_CHANNEL &channel)
@@ -453,13 +472,10 @@ PVR_ERROR UpdateTimer( const PVR_TIMER & timer )
 }
 
 /** UNUSED API FUNCTIONS */
-PVR_ERROR DialogChannelScan(void) { return PVR_ERROR_NOT_IMPLEMENTED; }
 PVR_ERROR CallMenuHook(const PVR_MENUHOOK &menuhook, const PVR_MENUHOOK_DATA &item) { return PVR_ERROR_NOT_IMPLEMENTED; }
 PVR_ERROR DeleteChannel(const PVR_CHANNEL &channel) { return PVR_ERROR_NOT_IMPLEMENTED; }
 PVR_ERROR RenameChannel(const PVR_CHANNEL &channel) { return PVR_ERROR_NOT_IMPLEMENTED; }
 PVR_ERROR MoveChannel(const PVR_CHANNEL &channel) { return PVR_ERROR_NOT_IMPLEMENTED; }
-PVR_ERROR DialogChannelSettings(const PVR_CHANNEL &channel) { return PVR_ERROR_NOT_IMPLEMENTED; }
-PVR_ERROR DialogAddChannel(const PVR_CHANNEL &channel) { return PVR_ERROR_NOT_IMPLEMENTED; }
 int GetChannelGroupsAmount(void) { return -1; }
 PVR_ERROR GetChannelGroups(ADDON_HANDLE handle, bool bRadio) { return PVR_ERROR_NOT_IMPLEMENTED; }
 PVR_ERROR GetChannelGroupMembers(ADDON_HANDLE handle, const PVR_CHANNEL_GROUP &group) { return PVR_ERROR_NOT_IMPLEMENTED; }
@@ -479,6 +495,8 @@ const char * GetLiveStreamURL(const PVR_CHANNEL &channel) { return ""; }
 PVR_ERROR GetRecordingEdl(const PVR_RECORDING&, PVR_EDL_ENTRY[], int*) { return PVR_ERROR_NOT_IMPLEMENTED; };
 PVR_ERROR RenameRecording(const PVR_RECORDING &recording) { return PVR_ERROR_NOT_IMPLEMENTED; }
 PVR_ERROR SetRecordingPlayCount(const PVR_RECORDING &recording, int count) { return PVR_ERROR_NOT_IMPLEMENTED; }
+PVR_ERROR DeleteAllRecordingsFromTrash() { return PVR_ERROR_NOT_IMPLEMENTED; }
+PVR_ERROR UndeleteRecording(const PVR_RECORDING& recording) { return PVR_ERROR_NOT_IMPLEMENTED; }
 void DemuxAbort(void) {}
 DemuxPacket* DemuxRead(void) { return NULL; }
 unsigned int GetChannelSwitchDelay(void) { return 0; }
