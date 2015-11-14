@@ -20,7 +20,8 @@
  */
 
 #include "client.h"
-#include "xbmc_pvr_dll.h"
+#include "kodi/xbmc_pvr_dll.h"
+#include "kodi/libKODI_guilib.h"
 #include "AminoPVRData.h"
 #include "platform/util/util.h"
 
@@ -507,4 +508,4 @@ time_t GetPlayingTime() { return 0; }
 time_t GetBufferTimeStart() { return 0; }
 time_t GetBufferTimeEnd() { return 0; }
 PVR_ERROR GetBackendTime(time_t *localTime, int *gmtOffset) { return PVR_ERROR_NOT_IMPLEMENTED; }
-}
+} //end extern "C"

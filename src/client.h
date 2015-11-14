@@ -20,10 +20,13 @@
  *
  */
 
-#include <platform/util/StdString.h>
-#include <libXBMC_addon.h>
-#include <libXBMC_pvr.h>
-#include <libXBMC_gui.h>
+#ifndef CLIENT_H
+#define CLIENT_H
+
+#include "platform/util/StdString.h"
+#include "kodi/libXBMC_addon.h"
+#include "kodi/libXBMC_pvr.h"
+#include "kodi/libXBMC_gui.h"
 
 #define DEFAULT_HOST            "127.0.0.1"
 #define DEFAULT_PORT            8080
@@ -40,4 +43,11 @@ extern bool                     g_SdOnly;           ///< Use SD streams only
 
 extern ADDON::CHelper_libXBMC_addon *XBMC;
 extern CHelper_libXBMC_pvr          *PVR;
-extern CHelper_libXBMC_gui          *GUI;
+
+/*!
+* @brief PVR macros for string exchange
+*/
+#define PVR_STRCPY(dest, source) do { strncpy(dest, source, sizeof(dest)-1); dest[sizeof(dest)-1] = '\0'; } while(0)
+#define PVR_STRCLR(dest) memset(dest, 0, sizeof(dest))
+
+#endif /* CLIENT_H */
