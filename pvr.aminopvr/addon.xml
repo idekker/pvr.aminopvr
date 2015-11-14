@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon
   id="pvr.aminopvr"
-  version="1.11.0"
+  version="1.10.0"
   name="AminoPVR Client"
   provider-name="Ino Dekker">
   <requires>
     <c-pluff version="0.1"/>
-    <import addon="xbmc.pvr" version="4.1.0"/>
+    <import addon="xbmc.pvr" version="1.9.6"/>
   </requires>
   <extension
     point="xbmc.pvrclient"
-    library_@PLATFORM@="@LIBRARY_FILENAME@"/>
+    library_linux="pvr.aminopvr.so"
+    library_osx="pvr.aminopvr.dylib"
+    library_freebsd="pvr.aminopvr.so"
+    library_windx="pvr.aminopvr.dll"
+    library_android="libpvr.aminopvr.so"/>
   <extension point="xbmc.addon.metadata">
     <summary lang="en_GB">AminoPVR Client</summary>
     <description lang="en_GB">AminoPVR Client</description>
     <disclaimer lang="en_GB"></disclaimer>
-    <platform>@PLATFORM@</platform>
+    <platform>all</platform>
   </extension>
 </addon>
