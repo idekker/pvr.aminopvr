@@ -1,22 +1,23 @@
-Source: kodi-pvr-demo
+Source: kodi-pvr-aminopvr
 Priority: extra
-Maintainer: Nobody <nobody@kodi.tv>
-Build-Depends: debhelper (>= 9.0.0), cmake, libtinyxml-dev, kodi-pvr-dev,
-               libkodiplatform-dev (>= 16.0.0), kodi-addon-dev
-Standards-Version: 3.9.2
+Maintainer: Ino Dekker <ino.dekker@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), cmake, kodi-pvr-dev,
+               libkodiplatform-dev (>= 16.0.0), kodi-addon-dev, libjsoncpp-dev
+Standards-Version: 3.9.4
 Section: libs
+Homepage: <http://kodi.tv>
 
-Package: kodi-pvr-demo
+Package: kodi-pvr-aminopvr
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Demo PVR for Kodi
- Demo PVR for Kodi
+Description: Amino PVR for Kodi
+ Amino PVR for Kodi
 
-Package: kodi-pvr-demo-dbg
-Section: debug
+Package: kodi-pvr-aminopvr-dbg
+Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: debug symbols for Demo PVR for Kodi
- debug symbols for Demo PVR for Kodi
+Description: debug symbols for Amino PVR for Kodi
+ debug symbols for Amino PVR for Kodi
 
