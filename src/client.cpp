@@ -52,7 +52,6 @@ std::string g_strClientPath   = "";
 
 CHelper_libXBMC_addon *XBMC   = NULL;
 CHelper_libXBMC_pvr   *PVR    = NULL;
-CHelper_libXBMC_gui   *GUI    = NULL;
 
 extern "C" {
 
@@ -132,15 +131,6 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
     return ADDON_STATUS_PERMANENT_FAILURE;
   }
 
-  GUI = new CHelper_libXBMC_gui;
-  if (!GUI->RegisterMe(hdl))
-  {
-    SAFE_DELETE(GUI);
-    SAFE_DELETE(PVR);
-    SAFE_DELETE(XBMC);
-    return ADDON_STATUS_PERMANENT_FAILURE;
-  }
-
   XBMC->Log(LOG_DEBUG, "%s - Creating the PVR demo add-on", __FUNCTION__);
 
   m_CurStatus     = ADDON_STATUS_UNKNOWN;
@@ -177,12 +167,6 @@ void ADDON_Destroy()
     delete(XBMC);
     XBMC = NULL;
   }
-
-  if (GUI)
-  {
-    delete(GUI);
-    GUI = NULL;
-  }
 }
 
 bool ADDON_HasSettings()
@@ -192,6 +176,7 @@ bool ADDON_HasSettings()
 
 unsigned int ADDON_GetSettings(ADDON_StructSetting ***sSet)
 {
+  NOTUSED(sSet);
   return 0;
 }
 
@@ -278,14 +263,12 @@ const char* GetMininumPVRAPIVersion(void)
 
 const char* GetGUIAPIVersion(void)
 {
-  static const char *strGuiApiVersion = XBMC_GUI_API_VERSION;
-  return strGuiApiVersion;
+  return KODI_GUILIB_API_VERSION;
 }
 
 const char* GetMininumGUIAPIVersion(void)
 {
-  static const char *strMinGuiApiVersion = XBMC_GUI_MIN_API_VERSION;
-  return strMinGuiApiVersion;
+  return KODI_GUILIB_MIN_API_VERSION;
 }
 
 PVR_ERROR GetAddonCapabilities(PVR_ADDON_CAPABILITIES* pCapabilities)
@@ -397,7 +380,7 @@ PVR_ERROR SignalStatus(PVR_SIGNAL_STATUS &signalStatus)
   return PVR_ERROR_NO_ERROR;
 }
 
-int GetRecordingsAmount(void)
+int GetRecordingsAmount(bool deleted)
 {
   if (m_data)
     return m_data->GetRecordingsAmount();
@@ -405,7 +388,7 @@ int GetRecordingsAmount(void)
   return -1;
 }
 
-PVR_ERROR GetRecordings(ADDON_HANDLE handle)
+PVR_ERROR GetRecordings(ADDON_HANDLE handle, bool deleted)
 {
   if (m_data)
     return m_data->GetRecordings(handle);
