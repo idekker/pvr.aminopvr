@@ -20,10 +20,9 @@
  */
 
 #include "client.h"
-#include "kodi/xbmc_pvr_dll.h"
-#include "kodi/libKODI_guilib.h"
+#include "xbmc_pvr_dll.h"
 #include "AminoPVRData.h"
-#include "platform/util/util.h"
+#include "p8-platform/util/util.h"
 
 using namespace std;
 using namespace ADDON;
@@ -262,24 +261,28 @@ const char* GetMininumPVRAPIVersion(void)
 
 const char* GetGUIAPIVersion(void)
 {
-  return KODI_GUILIB_API_VERSION;
+  return ""; // GUI API not used
 }
 
 const char* GetMininumGUIAPIVersion(void)
 {
-  return KODI_GUILIB_MIN_API_VERSION;
+  return ""; // GUI API not used	
 }
 
 PVR_ERROR GetAddonCapabilities(PVR_ADDON_CAPABILITIES* pCapabilities)
 {
   pCapabilities->bSupportsEPG                = true;
+  pCapabilities->bSupportsRecordings         = true;
+  pCapabilities->bSupportsRecordingsUndelete = false;
+  pCapabilities->bSupportsTimers             = true;
   pCapabilities->bSupportsTV                 = true;
   pCapabilities->bSupportsRadio              = false;
   pCapabilities->bSupportsChannelGroups      = false;
-  pCapabilities->bSupportsRecordings         = true;
-  pCapabilities->bSupportsRecordingFolders   = true;
+  pCapabilities->bHandlesInputStream         = false;
+  pCapabilities->bHandlesDemuxing            = false;
+  pCapabilities->bSupportsChannelScan        = false;
   pCapabilities->bSupportsLastPlayedPosition = true;
-  pCapabilities->bSupportsTimers             = true;
+  pCapabilities->bSupportsRecordingPlayCount = false;
 
   return PVR_ERROR_NO_ERROR;
 }
@@ -503,7 +506,7 @@ unsigned int GetChannelSwitchDelay(void) { return 0; }
 void PauseStream(bool bPaused) {}
 bool CanPauseStream(void) { return false; }
 bool CanSeekStream(void) { return false; }
-bool SeekTime(int,bool,double*) { return false; }
+bool SeekTime(double,bool,double*) { return false; }
 void SetSpeed(int) {};
 time_t GetPlayingTime() { return 0; }
 time_t GetBufferTimeStart() { return 0; }

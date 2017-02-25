@@ -1,7 +1,7 @@
 #pragma once
 /*
- *      Copyright (C) 2011 Pulse-Eight
- *      http://www.pulse-eight.com/
+ *      Copyright (C) 2017 Ino Dekker
+ *      https://github.com/idekker/
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,9 +23,9 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include "platform/util/StdString.h"
-#include "kodi/libXBMC_addon.h"
-#include "kodi/libXBMC_pvr.h"
+#include "p8-platform/util/StdString.h"
+#include "libXBMC_addon.h"
+#include "libXBMC_pvr.h"
 
 #define DEFAULT_HOST            "127.0.0.1"
 #define DEFAULT_PORT            8080

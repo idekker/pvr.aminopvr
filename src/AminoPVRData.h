@@ -23,7 +23,7 @@
 #include <map>
 #include <vector>
 #include <json/json.h>
-#include "platform/util/StdString.h"
+#include "p8-platform/util/StdString.h"
 #include "client.h"
 #include "categories.h"
 

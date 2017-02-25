@@ -549,14 +549,16 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
 
                     lTag.iPriority      = 0;
                     lTag.iLifetime      = -1;
+                    lTag.bStartAnyTime  = false;
+                    lTag.bEndAnyTime    = false;
 
                     switch ( lSchedule.Type )
                     {
-                        case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
                         case SCHEDULE_TYPE_ONCE_EVERY_DAY:
                         case SCHEDULE_TYPE_ANY_TIME:
+                        case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
                         case SCHEDULE_TYPE_MANUAL_EVERY_DAY:
-                            lTag.bIsRepeating   = true;
+                            lTag.iMaxRecordings = 0;
                             lTag.iWeekdays      = 0x7F; // 0111 1111
                             break;
                         case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
@@ -572,21 +574,40 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                                 else
                                     lWeekDay--;
 
-                                lTag.bIsRepeating   = true;
+                                lTag.iMaxRecordings = 0;
                                 lTag.iWeekdays      = 1 << lWeekDay;
                             }
                             break;
                         case SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY:
-                            lTag.bIsRepeating   = true;
+                            lTag.iMaxRecordings = 0;
                             lTag.iWeekdays      = 31; // 0001 1111
                             break;
                         case SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND:
-                            lTag.bIsRepeating   = true;
+                            lTag.iMaxRecordings = 0;
                             lTag.iWeekdays      = 96; // 0110 0000
                             break;
                         case SCHEDULE_TYPE_ONCE:
                         default:
-                            lTag.bIsRepeating   = false;
+                            lTag.iMaxRecordings = 1;
+                            break;
+                    }
+
+                    switch ( lSchedule.Type )
+                    {
+                        case SCHEDULE_TYPE_ONCE_EVERY_DAY:
+                        case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
+                        case SCHEDULE_TYPE_ANY_TIME:
+                            lTag.bStartAnyTime  = true;
+                            lTag.bEndAnyTime    = true;
+                            break;
+                        case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
+                        case SCHEDULE_TYPE_MANUAL_EVERY_DAY:
+                        case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
+                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEK:
+                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY:
+                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND:
+                        case SCHEDULE_TYPE_ONCE:
+                        default:
                             break;
                     }
 
@@ -625,7 +646,7 @@ PVR_ERROR AminoPVRData::AddTimer( const PVR_TIMER & aTimer )
 
     // TODO: If no program exists from startime to endtime, then it is a manual recording
     // TODO: Check value of iWeekdays and bIsRepeating
-    if ( aTimer.bIsRepeating )
+    if ( aTimer.iMaxRecordings > 0 )
     {
         switch ( aTimer.iWeekdays )
         {
