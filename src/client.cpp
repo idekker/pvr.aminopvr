@@ -247,6 +247,22 @@ void ADDON_Announce(const char *flag, const char *sender, const char *message, c
  * PVR Client AddOn specific public library functions
  ***********************************************************/
 
+void OnSystemSleep()
+{
+}
+
+void OnSystemWake()
+{
+}
+
+void OnPowerSavingActivated()
+{
+}
+
+void OnPowerSavingDeactivated()
+{
+}
+
 const char* GetPVRAPIVersion(void)
 {
   static const char *strApiVersion = XBMC_PVR_API_VERSION;
@@ -512,4 +528,8 @@ time_t GetPlayingTime() { return 0; }
 time_t GetBufferTimeStart() { return 0; }
 time_t GetBufferTimeEnd() { return 0; }
 PVR_ERROR GetBackendTime(time_t *localTime, int *gmtOffset) { return PVR_ERROR_NOT_IMPLEMENTED; }
+PVR_ERROR GetTimerTypes(PVR_TIMER_TYPE types[], int *size) { return PVR_ERROR_NOT_IMPLEMENTED; }
+bool IsTimeshifting(void) { return false; }
+bool IsRealTimeStream() { return true; }
+PVR_ERROR SetEPGTimeFrame(int) { return PVR_ERROR_NOT_IMPLEMENTED; }
 } //end extern "C"
