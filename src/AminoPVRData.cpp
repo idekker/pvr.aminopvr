@@ -663,7 +663,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                 }
 
                 lTag.iPriority = 0;
-                lTag.iLifetime = -1;
+                lTag.iLifetime = 0;
                 lTag.bStartAnyTime = false;
                 lTag.bEndAnyTime = false;
 
@@ -704,6 +704,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                     case SCHEDULE_TYPE_ONCE:
                     default:
                         lTag.iMaxRecordings = 1;
+                        lTag.iWeekdays = 0x7F; // 0111 1111
                         break;
                 }
 
@@ -721,7 +722,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
 
                 lTag.iPreventDuplicateEpisodes = lSchedule.DupMethod;
                 lTag.firstDay = lSchedule.StartTime;
-                lTag.iEpgUid = EPG_TAG_INVALID_UID;
+                lTag.iEpgUid = PVR_TIMER_NO_EPG_UID;
                 lTag.iMarginStart = lSchedule.StartEarly;
                 lTag.iMarginEnd = lSchedule.EndLate;
                 lTag.iGenreType = 0;
@@ -735,16 +736,6 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
             {
                 AminoPVRRecording & lRecording = ivScheduledRecordings.at( lRecordingPtr );
 
-    //            PVR_TIMER_STATE_NEW          = 0, /*!< @brief a new, unsaved timer */
-    //PVR_TIMER_STATE_SCHEDULED    = 1, /*!< @brief the timer is scheduled for recording */
-    //PVR_TIMER_STATE_RECORDING    = 2, /*!< @brief the timer is currently recordings */
-    //PVR_TIMER_STATE_COMPLETED    = 3, /*!< @brief the recording completed successfully */
-    //PVR_TIMER_STATE_ABORTED      = 4, /*!< @brief recording started, but was aborted */
-    //PVR_TIMER_STATE_CANCELLED    = 5, /*!< @brief the timer was scheduled, but was canceled */
-    //PVR_TIMER_STATE_CONFLICT_OK  = 6, /*!< @brief the scheduled timer conflicts with another one, but will be recorded */
-    //PVR_TIMER_STATE_CONFLICT_NOK = 7, /*!< @brief the scheduled timer conflicts with another one and won't be recorded */
-    //PVR_TIMER_STATE_ERROR        = 8  /*!< @brief the timer is scheduled, but can't be recorded for some reason */
-
                 for ( unsigned int lSchedulePtr = 0; lSchedulePtr < ivSchedules.size(); lSchedulePtr++ )
                 {
                     PVR_TIMER         lTag;
@@ -756,6 +747,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
 
                     lTag.iClientIndex       = 0xF000000 + lRecording.Id;                // This is timerId, not actual recordingId
                     lTag.iParentClientIndex = lSchedule.Id;
+                    lTag.iTimerType         = lSchedule.Type;
                     if ( lSchedule.ChannelId != -1 )
                     {
                         lTag.iClientChannelUid = lSchedule.ChannelId;
@@ -824,7 +816,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                     }
 
                     lTag.iPriority = 0;
-                    lTag.iLifetime = -1;
+                    lTag.iLifetime = 0;
                     lTag.bStartAnyTime = false;
                     lTag.bEndAnyTime = false;
 
@@ -865,6 +857,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                         case SCHEDULE_TYPE_ONCE:
                         default:
                             lTag.iMaxRecordings = 1;
+                            lTag.iWeekdays = 0x7F; // 0111 1111
                             break;
                     }
 
