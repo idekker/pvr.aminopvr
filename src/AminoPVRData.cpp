@@ -435,17 +435,149 @@ int AminoPVRData::GetRecordingLastPlayedPosition( const PVR_RECORDING & aRecordi
     return PVR_ERROR_SERVER_ERROR;
 }
 
+PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
+{
+    *size = 10;
+
+    types[0].iId = SCHEDULE_TYPE_ONCE;
+    types[0].iAttributes = PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_TITLE_EPG_MATCH | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
+    strncpy(types[0].strDescription, "Record once", sizeof(types[0].strDescription) - 1);
+    types[0].iPrioritiesSize = 0;
+    types[0].iLifetimesSize = 0;
+    types[0].iPreventDuplicateEpisodesSize = 8;
+    types[0].preventDuplicateEpisodes[0].iValue = DUPLICATION_METHOD_NONE;
+    strncpy(types[0].preventDuplicateEpisodes[0].strDescription, "No duplicate prevention", sizeof(types[0].preventDuplicateEpisodes[0].strDescription) - 1);
+    types[0].preventDuplicateEpisodes[1].iValue = DUPLICATION_METHOD_TITLE;
+    strncpy(types[0].preventDuplicateEpisodes[1].strDescription, "Prevent duplicates based on title", sizeof(types[0].preventDuplicateEpisodes[1].strDescription) - 1);
+    types[0].preventDuplicateEpisodes[2].iValue = DUPLICATION_METHOD_SUBTITLE;
+    strncpy(types[0].preventDuplicateEpisodes[2].strDescription, "Prevent duplicates based on subtitle", sizeof(types[0].preventDuplicateEpisodes[2].strDescription) - 1);
+    types[0].preventDuplicateEpisodes[3].iValue = DUPLICATION_METHOD_TITLE | DUPLICATION_METHOD_SUBTITLE;
+    strncpy(types[0].preventDuplicateEpisodes[3].strDescription, "Prevent duplicates based on title and subtitle", sizeof(types[0].preventDuplicateEpisodes[3].strDescription) - 1);
+    types[0].preventDuplicateEpisodes[4].iValue = DUPLICATION_METHOD_DESCRIPTION;
+    strncpy(types[0].preventDuplicateEpisodes[4].strDescription, "Prevent duplicates based on description", sizeof(types[0].preventDuplicateEpisodes[4].strDescription) - 1);
+    types[0].preventDuplicateEpisodes[5].iValue = DUPLICATION_METHOD_TITLE | DUPLICATION_METHOD_DESCRIPTION;
+    strncpy(types[0].preventDuplicateEpisodes[5].strDescription, "Prevent duplicates based on title and description", sizeof(types[0].preventDuplicateEpisodes[5].strDescription) - 1);
+    types[0].preventDuplicateEpisodes[6].iValue = DUPLICATION_METHOD_SUBTITLE | DUPLICATION_METHOD_DESCRIPTION;
+    strncpy(types[0].preventDuplicateEpisodes[6].strDescription, "Prevent duplicates based on subtitle and description", sizeof(types[0].preventDuplicateEpisodes[6].strDescription) - 1);
+    types[0].preventDuplicateEpisodes[7].iValue = DUPLICATION_METHOD_TITLE | DUPLICATION_METHOD_SUBTITLE | DUPLICATION_METHOD_DESCRIPTION;
+    strncpy(types[0].preventDuplicateEpisodes[7].strDescription, "Prevent duplicates based on title, subtitle and description", sizeof(types[0].preventDuplicateEpisodes[7].strDescription) - 1);
+    types[0].iPreventDuplicateEpisodesDefault = 1;
+    types[0].iRecordingGroupSize = 0;
+    types[0].iMaxRecordingsSize = 0;
+
+    types[1].iId = SCHEDULE_TYPE_TIMESLOT_EVERY_DAY;
+    types[1].iAttributes = PVR_TIMER_TYPE_IS_REPEATING | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_START_TIME | PVR_TIMER_TYPE_SUPPORTS_END_TIME | PVR_TIMER_TYPE_SUPPORTS_TITLE_EPG_MATCH | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
+    strncpy( types[1].strDescription, "Record around timeslot every day", sizeof( types[1].strDescription ) - 1 );
+    types[1].iPrioritiesSize = 0;
+    types[1].iLifetimesSize = 0;
+    types[1].iPreventDuplicateEpisodesSize = 8;
+    memcpy_s( types[1].preventDuplicateEpisodes, sizeof( types[1].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    types[1].iPreventDuplicateEpisodesDefault = 1;
+    types[1].iRecordingGroupSize = 0;
+    types[1].iMaxRecordingsSize = 0;
+
+    types[2].iId = SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK;
+    types[2].iAttributes = PVR_TIMER_TYPE_IS_REPEATING | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_START_TIME | PVR_TIMER_TYPE_SUPPORTS_END_TIME | PVR_TIMER_TYPE_SUPPORTS_TITLE_EPG_MATCH | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
+    strncpy( types[2].strDescription, "Record around timeslot every week", sizeof( types[2].strDescription ) - 1 );
+    types[2].iPrioritiesSize = 0;
+    types[2].iLifetimesSize = 0;
+    types[2].iPreventDuplicateEpisodesSize = 8;
+    memcpy_s( types[2].preventDuplicateEpisodes, sizeof( types[2].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    types[2].iPreventDuplicateEpisodesDefault = 1;
+    types[2].iRecordingGroupSize = 0;
+    types[2].iMaxRecordingsSize = 0;
+
+    types[3].iId = SCHEDULE_TYPE_ONCE_EVERY_DAY;
+    types[3].iAttributes = PVR_TIMER_TYPE_IS_REPEATING | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_TITLE_EPG_MATCH | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
+    strncpy( types[3].strDescription, "Record once every day", sizeof( types[3].strDescription ) - 1 );
+    types[3].iPrioritiesSize = 0;
+    types[3].iLifetimesSize = 0;
+    types[3].iPreventDuplicateEpisodesSize = 8;
+    memcpy_s( types[3].preventDuplicateEpisodes, sizeof( types[3].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    types[3].iPreventDuplicateEpisodesDefault = 1;
+    types[3].iRecordingGroupSize = 0;
+    types[3].iMaxRecordingsSize = 0;
+
+    types[4].iId = SCHEDULE_TYPE_ONCE_EVERY_WEEK;
+    types[4].iAttributes = PVR_TIMER_TYPE_IS_REPEATING | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_TITLE_EPG_MATCH | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
+    strncpy( types[4].strDescription, "Record once every week", sizeof( types[4].strDescription ) - 1 );
+    types[4].iPrioritiesSize = 0;
+    types[4].iLifetimesSize = 0;
+    types[4].iPreventDuplicateEpisodesSize = 8;
+    memcpy_s( types[4].preventDuplicateEpisodes, sizeof( types[4].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    types[4].iPreventDuplicateEpisodesDefault = 1;
+    types[4].iRecordingGroupSize = 0;
+    types[4].iMaxRecordingsSize = 0;
+
+    types[5].iId = SCHEDULE_TYPE_ANY_TIME;
+    types[5].iAttributes = PVR_TIMER_TYPE_IS_REPEATING | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_TITLE_EPG_MATCH | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
+    strncpy(types[5].strDescription, "Record at any time", sizeof(types[5].strDescription) - 1);
+    types[5].iPrioritiesSize = 0;
+    types[5].iLifetimesSize = 0;
+    types[5].iPreventDuplicateEpisodesSize = 8;
+    memcpy_s( types[5].preventDuplicateEpisodes, sizeof( types[5].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    types[5].iPreventDuplicateEpisodesDefault = 1;
+    types[5].iRecordingGroupSize = 0;
+    types[5].iMaxRecordingsSize = 0;
+
+    types[6].iId = SCHEDULE_TYPE_MANUAL_EVERY_DAY;
+    types[6].iAttributes = PVR_TIMER_TYPE_IS_MANUAL | PVR_TIMER_TYPE_IS_REPEATING | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_START_TIME | PVR_TIMER_TYPE_SUPPORTS_END_TIME | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
+    strncpy( types[6].strDescription, "Manual recording every day", sizeof( types[6].strDescription ) - 1 );
+    types[6].iPrioritiesSize = 0;
+    types[6].iLifetimesSize = 0;
+    types[6].iPreventDuplicateEpisodesSize = 8;
+    memcpy_s( types[6].preventDuplicateEpisodes, sizeof( types[6].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    types[6].iPreventDuplicateEpisodesDefault = 1;
+    types[6].iRecordingGroupSize = 0;
+    types[6].iMaxRecordingsSize = 0;
+
+    types[7].iId = SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY;
+    types[7].iAttributes = PVR_TIMER_TYPE_IS_MANUAL | PVR_TIMER_TYPE_IS_REPEATING | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_START_TIME | PVR_TIMER_TYPE_SUPPORTS_END_TIME | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
+    strncpy( types[7].strDescription, "Manual recording every weekday", sizeof( types[7].strDescription ) - 1 );
+    types[7].iPrioritiesSize = 0;
+    types[7].iLifetimesSize = 0;
+    types[7].iPreventDuplicateEpisodesSize = 8;
+    memcpy_s( types[7].preventDuplicateEpisodes, sizeof( types[7].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    types[7].iPreventDuplicateEpisodesDefault = 1;
+    types[7].iRecordingGroupSize = 0;
+    types[7].iMaxRecordingsSize = 0;
+
+    types[8].iId = SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND;
+    types[8].iAttributes = PVR_TIMER_TYPE_IS_MANUAL | PVR_TIMER_TYPE_IS_REPEATING | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_START_TIME | PVR_TIMER_TYPE_SUPPORTS_END_TIME | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
+    strncpy( types[8].strDescription, "Manual recording every weekend day", sizeof( types[8].strDescription ) - 1 );
+    types[8].iPrioritiesSize = 0;
+    types[8].iLifetimesSize = 0;
+    types[8].iPreventDuplicateEpisodesSize = 8;
+    memcpy_s( types[8].preventDuplicateEpisodes, sizeof( types[8].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    types[8].iPreventDuplicateEpisodesDefault = 1;
+    types[8].iRecordingGroupSize = 0;
+    types[8].iMaxRecordingsSize = 0;
+
+    types[9].iId = SCHEDULE_TYPE_MANUAL_EVERY_WEEK;
+    types[9].iAttributes = PVR_TIMER_TYPE_IS_MANUAL | PVR_TIMER_TYPE_IS_REPEATING | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_START_TIME | PVR_TIMER_TYPE_SUPPORTS_END_TIME | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
+    strncpy( types[9].strDescription, "Manual recording every week", sizeof( types[9].strDescription ) - 1 );
+    types[9].iPrioritiesSize = 0;
+    types[9].iLifetimesSize = 0;
+    types[9].iPreventDuplicateEpisodesSize = 8;
+    memcpy_s( types[9].preventDuplicateEpisodes, sizeof( types[9].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    types[9].iPreventDuplicateEpisodesDefault = 1;
+    types[9].iRecordingGroupSize = 0;
+    types[9].iMaxRecordingsSize = 0;
+    
+    return PVR_ERROR_NO_ERROR;
+}
+
 int AminoPVRData::GetTimersAmount( void )
 {
-    int         lNumRecordings = 0;
+    int         lNumSchedules = 0;
     Json::Value lResponse;
     XBMC->Log( LOG_DEBUG, "%s()", __FUNCTION__ );
-    if ( GrabAndParse( ConstructUrl( "/api/schedules/getNumScheduledRecordings" ), lResponse ) )
+    if ( GrabAndParse( ConstructUrl( "/api/schedules/getScheduleList" ), lResponse ) )
     {
-        lNumRecordings = lResponse["num_recordings"].asInt();
+        lNumSchedules = lResponse.size();
     }
 
-    return lNumRecordings;
+    return lNumSchedules;
 }
 
 PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
@@ -479,9 +611,129 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
             for ( int lIndex = 0; lIndex < lSize; ++lIndex )
             {
                 AminoPVRRecording lRecording;
-                PVR_TIMER         lTag;
 
                 CreateRecordingEntry( lResponse[lIndex], lRecording );
+
+                ivScheduledRecordings.push_back( lRecording );   //Local cache...
+            }
+
+            for ( unsigned int lSchedulePtr = 0; lSchedulePtr < ivSchedules.size(); lSchedulePtr++ )
+            {
+                AminoPVRSchedule & lSchedule = ivSchedules.at( lSchedulePtr );
+                PVR_TIMER lTag;
+                memset( &lTag, 0, sizeof( lTag ) );
+
+                lTag.iClientIndex = lSchedule.Id;                // This is timerId, not actual recordingId
+                if ( lSchedule.ChannelId != -1 )
+                {
+                    lTag.iClientChannelUid = lSchedule.ChannelId;
+                }
+                else
+                {
+                    lTag.iClientChannelUid = PVR_TIMER_ANY_CHANNEL;
+                }
+                lTag.iTimerType = lSchedule.Type;
+                lTag.startTime = lSchedule.StartTime;
+                lTag.endTime = lSchedule.EndTime;
+                if ( lSchedule.Inactive )
+                {
+                    lTag.state = PVR_TIMER_STATE_DISABLED;
+                }
+                else
+                {
+                    lTag.state = PVR_TIMER_STATE_COMPLETED;
+                }
+
+                strncpy( lTag.strTitle, lSchedule.Title.c_str(), sizeof( lTag.strTitle ) - 1 );
+                strncpy( lTag.strDirectory, lSchedule.Title.c_str(), sizeof( lTag.strDirectory ) - 1 );
+
+                switch ( lSchedule.Type )
+                {
+                    case SCHEDULE_TYPE_ONCE_EVERY_DAY:
+                    case SCHEDULE_TYPE_ANY_TIME:
+                    case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
+                    case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
+                    case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
+                    case SCHEDULE_TYPE_ONCE:
+                        strncpy( lTag.strEpgSearchString, lSchedule.Title.c_str(), sizeof( lTag.strEpgSearchString ) - 1 );
+                        lTag.bFullTextEpgSearch = true;
+                        break;
+                    default:
+                        break;
+                }
+
+                lTag.iPriority = 0;
+                lTag.iLifetime = -1;
+                lTag.bStartAnyTime = false;
+                lTag.bEndAnyTime = false;
+
+                switch ( lSchedule.Type )
+                {
+                    case SCHEDULE_TYPE_ONCE_EVERY_DAY:
+                    case SCHEDULE_TYPE_ANY_TIME:
+                    case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
+                    case SCHEDULE_TYPE_MANUAL_EVERY_DAY:
+                        lTag.iMaxRecordings = 0;
+                        lTag.iWeekdays = 0x7F; // 0111 1111
+                        break;
+                    case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
+                    case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
+                    case SCHEDULE_TYPE_MANUAL_EVERY_WEEK:
+                    {
+                        struct tm lTimeInfo = *localtime( &lSchedule.StartTime );
+                        int       lWeekDay = lTimeInfo.tm_wday;    // days since Sunday [0-6]
+
+                                                                   // bit 0 = monday, need to convert weekday value to bitnumber:
+                        if (lWeekDay == 0)
+                            lWeekDay = 6;   // sunday 0100 0000
+                        else
+                            lWeekDay--;
+
+                        lTag.iMaxRecordings = 0;
+                        lTag.iWeekdays = 1 << lWeekDay;
+                    }
+                    break;
+                    case SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY:
+                        lTag.iMaxRecordings = 0;
+                        lTag.iWeekdays = 31; // 0001 1111
+                        break;
+                    case SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND:
+                        lTag.iMaxRecordings = 0;
+                        lTag.iWeekdays = 96; // 0110 0000
+                        break;
+                    case SCHEDULE_TYPE_ONCE:
+                    default:
+                        lTag.iMaxRecordings = 1;
+                        break;
+                }
+
+                switch ( lSchedule.Type )
+                {
+                    case SCHEDULE_TYPE_ONCE_EVERY_DAY:
+                    case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
+                    case SCHEDULE_TYPE_ANY_TIME:
+                        lTag.bStartAnyTime = true;
+                        lTag.bEndAnyTime = true;
+                        break;
+                    default:
+                        break;
+                }
+
+                lTag.iPreventDuplicateEpisodes = lSchedule.DupMethod;
+                lTag.firstDay = lSchedule.StartTime;
+                lTag.iEpgUid = EPG_TAG_INVALID_UID;
+                lTag.iMarginStart = lSchedule.StartEarly;
+                lTag.iMarginEnd = lSchedule.EndLate;
+                lTag.iGenreType = 0;
+                lTag.iGenreSubType = 0;
+
+                XBMC->Log( LOG_DEBUG, "Found schedule: %s, Unique id: %d\n", lSchedule.Title.c_str(), lTag.iClientIndex );
+
+                PVR->TransferTimerEntry( aHandle, &lTag );
+            }
+            for ( unsigned int lRecordingPtr = 0; lRecordingPtr < ivScheduledRecordings.size(); lRecordingPtr++ )
+            {
+                AminoPVRRecording & lRecording = ivScheduledRecordings.at( lRecordingPtr );
 
     //            PVR_TIMER_STATE_NEW          = 0, /*!< @brief a new, unsaved timer */
     //PVR_TIMER_STATE_SCHEDULED    = 1, /*!< @brief the timer is scheduled for recording */
@@ -495,14 +747,23 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
 
                 for ( unsigned int lSchedulePtr = 0; lSchedulePtr < ivSchedules.size(); lSchedulePtr++ )
                 {
+                    PVR_TIMER         lTag;
                     AminoPVRSchedule & lSchedule = ivSchedules.at( lSchedulePtr );
                     if ( lSchedule.Id != lRecording.ScheduleId )
                         continue;
                 
                     memset( &lTag, 0, sizeof( lTag ) );
 
-                    lTag.iClientIndex       = lRecording.Id;                // This is timerId, not actual recordingId
-                    lTag.iClientChannelUid  = lRecording.ChannelId;
+                    lTag.iClientIndex       = 0xF000000 + lRecording.Id;                // This is timerId, not actual recordingId
+                    lTag.iParentClientIndex = lSchedule.Id;
+                    if ( lSchedule.ChannelId != -1 )
+                    {
+                        lTag.iClientChannelUid = lSchedule.ChannelId;
+                    }
+                    else
+                    {
+                        lTag.iClientChannelUid = PVR_TIMER_ANY_CHANNEL;
+                    }
                     lTag.startTime          = lRecording.StartTime;
                     lTag.endTime            = lRecording.EndTime;
 
@@ -547,10 +808,25 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
 
                     strncpy( lTag.strSummary,       lRecording.EpgEntry.Description.c_str(),    sizeof( lTag.strSummary ) );
 
-                    lTag.iPriority      = 0;
-                    lTag.iLifetime      = -1;
-                    lTag.bStartAnyTime  = false;
-                    lTag.bEndAnyTime    = false;
+                    switch ( lSchedule.Type )
+                    {
+                        case SCHEDULE_TYPE_ONCE_EVERY_DAY:
+                        case SCHEDULE_TYPE_ANY_TIME:
+                        case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
+                        case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
+                        case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
+                        case SCHEDULE_TYPE_ONCE:
+                            strncpy( lTag.strEpgSearchString, lSchedule.Title.c_str(), sizeof( lTag.strEpgSearchString ) - 1 );
+                            lTag.bFullTextEpgSearch = true;
+                            break;
+                        default:
+                            break;
+                    }
+
+                    lTag.iPriority = 0;
+                    lTag.iLifetime = -1;
+                    lTag.bStartAnyTime = false;
+                    lTag.bEndAnyTime = false;
 
                     switch ( lSchedule.Type )
                     {
@@ -559,32 +835,32 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                         case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
                         case SCHEDULE_TYPE_MANUAL_EVERY_DAY:
                             lTag.iMaxRecordings = 0;
-                            lTag.iWeekdays      = 0x7F; // 0111 1111
+                            lTag.iWeekdays = 0x7F; // 0111 1111
                             break;
                         case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
                         case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
                         case SCHEDULE_TYPE_MANUAL_EVERY_WEEK:
-                            {
-                                struct tm lTimeInfo = *localtime( &lSchedule.StartTime );
-                                int       lWeekDay  = lTimeInfo.tm_wday;    // days since Sunday [0-6]
+                        {
+                            struct tm lTimeInfo = *localtime( &lSchedule.StartTime );
+                            int       lWeekDay = lTimeInfo.tm_wday;    // days since Sunday [0-6]
 
-                                // bit 0 = monday, need to convert weekday value to bitnumber:
-                                if ( lWeekDay == 0 )
-                                    lWeekDay = 6;   // sunday 0100 0000
-                                else
-                                    lWeekDay--;
+                                                                       // bit 0 = monday, need to convert weekday value to bitnumber:
+                            if ( lWeekDay == 0 )
+                                lWeekDay = 6;   // sunday 0100 0000
+                            else
+                                lWeekDay--;
 
-                                lTag.iMaxRecordings = 0;
-                                lTag.iWeekdays      = 1 << lWeekDay;
-                            }
-                            break;
+                            lTag.iMaxRecordings = 0;
+                            lTag.iWeekdays = 1 << lWeekDay;
+                        }
+                        break;
                         case SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY:
                             lTag.iMaxRecordings = 0;
-                            lTag.iWeekdays      = 31; // 0001 1111
+                            lTag.iWeekdays = 31; // 0001 1111
                             break;
                         case SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND:
                             lTag.iMaxRecordings = 0;
-                            lTag.iWeekdays      = 96; // 0110 0000
+                            lTag.iWeekdays = 96; // 0110 0000
                             break;
                         case SCHEDULE_TYPE_ONCE:
                         default:
@@ -597,20 +873,14 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                         case SCHEDULE_TYPE_ONCE_EVERY_DAY:
                         case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
                         case SCHEDULE_TYPE_ANY_TIME:
-                            lTag.bStartAnyTime  = true;
-                            lTag.bEndAnyTime    = true;
+                            lTag.bStartAnyTime = true;
+                            lTag.bEndAnyTime = true;
                             break;
-                        case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
-                        case SCHEDULE_TYPE_MANUAL_EVERY_DAY:
-                        case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
-                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEK:
-                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY:
-                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND:
-                        case SCHEDULE_TYPE_ONCE:
                         default:
                             break;
                     }
 
+                    lTag.iPreventDuplicateEpisodes = lSchedule.DupMethod;
                     lTag.firstDay       = lSchedule.StartTime;
                     lTag.iEpgUid        = lRecording.EpgProgramId;
                     lTag.iMarginStart   = lSchedule.StartEarly;
@@ -618,9 +888,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                     lTag.iGenreType     = 0;
                     lTag.iGenreSubType  = 0;
 
-                    XBMC->Log( LOG_DEBUG, "Found scheduled recording: %s, Unique id: %d\n", lRecording.Title.c_str(), lTag.iClientIndex );
-
-                    ivScheduledRecordings.push_back( lRecording );   //Local cache...
+                    XBMC->Log( LOG_DEBUG, "Found scheduled recording: %s, Unique id: %d, Parent id: %d\n", lRecording.Title.c_str(), lTag.iClientIndex, lTag.iParentClientIndex );
 
                     PVR->TransferTimerEntry( aHandle, &lTag );
 
@@ -641,49 +909,39 @@ PVR_ERROR AminoPVRData::AddTimer( const PVR_TIMER & aTimer )
 
     AminoPVRSchedule lSchedule;
 
-    lSchedule.Id            = -1;
-    lSchedule.Type          = SCHEDULE_TYPE_ONCE;
-
-    // TODO: If no program exists from startime to endtime, then it is a manual recording
-    // TODO: Check value of iWeekdays and bIsRepeating
-    if ( aTimer.iMaxRecordings > 0 )
-    {
-        switch ( aTimer.iWeekdays )
-        {
-            case 0x40:  // Sunday
-            case 0x20:  // Saturday
-            case 0x10:  // Friday
-            case 0x08:  // Thursday
-            case 0x04:  // Wednesday
-            case 0x02:  // Tuesday
-            case 0x01:  // Monday
-                lSchedule.Type = SCHEDULE_TYPE_ONCE_EVERY_WEEK;
-                break;
-            case 0x1F:  // Weekdays
-                lSchedule.Type = SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY;
-                break;
-            case 0x60:  // Weekends
-                lSchedule.Type = SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND;
-                break;
-            case 0x7F:
-                lSchedule.Type = SCHEDULE_TYPE_ONCE_EVERY_DAY;
-                break;
-            default:
-                lSchedule.Type = SCHEDULE_TYPE_ANY_TIME;
-                break;
-        }
-    }
-
-    lSchedule.Title.Format( "%s", aTimer.strTitle );
+    lSchedule.Id                = -1;
     lSchedule.ChannelId         = aTimer.iClientChannelUid;
+    lSchedule.Type              = (ScheduleType)aTimer.iTimerType;
+    switch ( lSchedule.Type )
+    {
+        case SCHEDULE_TYPE_ONCE_EVERY_DAY:
+        case SCHEDULE_TYPE_ANY_TIME:
+        case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
+        case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
+        case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
+        case SCHEDULE_TYPE_ONCE:
+            lSchedule.Title.Format( "%s", aTimer.strEpgSearchString );
+            break;
+        default:
+            lSchedule.Title.Format( "%s", aTimer.strTitle );
+            break;
+    }
     lSchedule.StartTime         = aTimer.startTime;
     lSchedule.EndTime           = aTimer.endTime;
     lSchedule.StartEarly        = aTimer.iMarginStart;
     lSchedule.EndLate           = aTimer.iMarginEnd;
     lSchedule.PreferHd          = true;
-    lSchedule.PreferUnscrambled = true;
-    lSchedule.DupMethod         = (DuplicationType)(DUPLICATION_METHOD_TITLE | DUPLICATION_METHOD_SUBTITLE | DUPLICATION_METHOD_DESCRIPTION);
-    lSchedule.Inactive          = false;
+    lSchedule.PreferUnscrambled = false;
+    lSchedule.DupMethod         = (DuplicationType)aTimer.iPreventDuplicateEpisodes;
+    switch ( aTimer.state )
+    {
+        case PVR_TIMER_STATE_DISABLED:
+            lSchedule.Inactive = true;
+            break;
+        default:
+            lSchedule.Inactive = false;
+            break;
+    }
 
     Json::Value         lJson;
     Json::FastWriter    lWriter;
@@ -789,8 +1047,14 @@ bool AminoPVRData::PostAndParse( const CStdString aUrl, Json::Value aArguments, 
     Json::FastWriter    lWriter;
     CStdString          lJson;
     CCurlFile           lHttp;
+    CStdString          lData;
 
-    if ( !lHttp.Post( aUrl, CStdString( lWriter.write( aArguments ) ), lJson ) )
+    if ( aArguments.isString() )
+    {
+        lData.Format( "%s=%s", aArguments.asString().c_str(), lWriter.write( aArguments[aArguments.asString()] ) );
+    }
+
+    if ( !lHttp.Post( aUrl, lData, lJson ) )
     {
         XBMC->Log( LOG_ERROR, "%s: Could not open connection to AminoPVR backend: aUrl=%s, aArguments=%s\n", __FUNCTION__, aUrl.c_str(), aArguments.toStyledString().c_str() );
     }

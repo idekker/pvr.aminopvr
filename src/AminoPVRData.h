@@ -152,6 +152,7 @@ public:
     virtual PVR_ERROR SetRecordingLastPlayedPosition( const PVR_RECORDING & aRecording, int aLastPlayedPosition );
     virtual int       GetRecordingLastPlayedPosition( const PVR_RECORDING & aRecording );
 
+	virtual PVR_ERROR GetTimerTypes( PVR_TIMER_TYPE types[], int *size );
     virtual int       GetTimersAmount( void );
     virtual PVR_ERROR GetTimers( ADDON_HANDLE handle );
     virtual PVR_ERROR AddTimer( const PVR_TIMER & timer );

@@ -452,7 +452,14 @@ int GetRecordingLastPlayedPosition(const PVR_RECORDING &recording)
 {
     if (m_data)
       return m_data->GetRecordingLastPlayedPosition(recording);
-    return -1;
+    return PVR_ERROR_SERVER_ERROR;
+}
+
+PVR_ERROR GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
+{
+	if (m_data)
+		return m_data->GetTimerTypes(types, size);
+	return PVR_ERROR_SERVER_ERROR;
 }
 
 int GetTimersAmount(void)
@@ -528,7 +535,6 @@ time_t GetPlayingTime() { return 0; }
 time_t GetBufferTimeStart() { return 0; }
 time_t GetBufferTimeEnd() { return 0; }
 PVR_ERROR GetBackendTime(time_t *localTime, int *gmtOffset) { return PVR_ERROR_NOT_IMPLEMENTED; }
-PVR_ERROR GetTimerTypes(PVR_TIMER_TYPE types[], int *size) { return PVR_ERROR_NOT_IMPLEMENTED; }
 bool IsTimeshifting(void) { return false; }
 bool IsRealTimeStream() { return true; }
 PVR_ERROR SetEPGTimeFrame(int) { return PVR_ERROR_NOT_IMPLEMENTED; }
