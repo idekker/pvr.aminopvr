@@ -440,7 +440,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     *size = 10;
 
     types[0].iId = SCHEDULE_TYPE_ONCE;
-    types[0].iAttributes = PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_TITLE_EPG_MATCH | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
+    types[0].iAttributes = PVR_TIMER_TYPE_IS_MANUAL | PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_START_TIME | PVR_TIMER_TYPE_SUPPORTS_END_TIME | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
     strncpy(types[0].strDescription, "Record once", sizeof(types[0].strDescription) - 1);
     types[0].iPrioritiesSize = 0;
     types[0].iLifetimesSize = 0;
@@ -620,117 +620,132 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
             for ( unsigned int lSchedulePtr = 0; lSchedulePtr < ivSchedules.size(); lSchedulePtr++ )
             {
                 AminoPVRSchedule & lSchedule = ivSchedules.at( lSchedulePtr );
-                PVR_TIMER lTag;
-                memset( &lTag, 0, sizeof( lTag ) );
+                /*
+                 * For schedule once timers we're actually only interested in the ones in the future.
+                 * When they are in the future, there should be a scheduled recording for it, which are processed next.
+                 * For that reason we don't have to add them as a schedule.
+                 */
+                if ( lSchedule.Type != SCHEDULE_TYPE_ONCE )
+                {
+                    PVR_TIMER lTag;
+                    memset( &lTag, 0, sizeof( lTag ) );
 
-                lTag.iClientIndex = lSchedule.Id;                // This is timerId, not actual recordingId
-                if ( lSchedule.ChannelId != -1 )
-                {
-                    lTag.iClientChannelUid = lSchedule.ChannelId;
-                }
-                else
-                {
-                    lTag.iClientChannelUid = PVR_TIMER_ANY_CHANNEL;
-                }
-                lTag.iTimerType = lSchedule.Type;
-                lTag.startTime = lSchedule.StartTime;
-                lTag.endTime = lSchedule.EndTime;
-                if ( lSchedule.Inactive )
-                {
-                    lTag.state = PVR_TIMER_STATE_DISABLED;
-                }
-                else
-                {
-                    lTag.state = PVR_TIMER_STATE_COMPLETED;
-                }
-
-                strncpy( lTag.strTitle, lSchedule.Title.c_str(), sizeof( lTag.strTitle ) - 1 );
-                strncpy( lTag.strDirectory, lSchedule.Title.c_str(), sizeof( lTag.strDirectory ) - 1 );
-
-                switch ( lSchedule.Type )
-                {
-                    case SCHEDULE_TYPE_ONCE_EVERY_DAY:
-                    case SCHEDULE_TYPE_ANY_TIME:
-                    case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
-                    case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
-                    case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
-                    case SCHEDULE_TYPE_ONCE:
-                        strncpy( lTag.strEpgSearchString, lSchedule.Title.c_str(), sizeof( lTag.strEpgSearchString ) - 1 );
-                        lTag.bFullTextEpgSearch = true;
-                        break;
-                    default:
-                        break;
-                }
-
-                lTag.iPriority = 0;
-                lTag.iLifetime = 0;
-                lTag.bStartAnyTime = false;
-                lTag.bEndAnyTime = false;
-
-                switch ( lSchedule.Type )
-                {
-                    case SCHEDULE_TYPE_ONCE_EVERY_DAY:
-                    case SCHEDULE_TYPE_ANY_TIME:
-                    case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
-                    case SCHEDULE_TYPE_MANUAL_EVERY_DAY:
-                        lTag.iMaxRecordings = 0;
-                        lTag.iWeekdays = 0x7F; // 0111 1111
-                        break;
-                    case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
-                    case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
-                    case SCHEDULE_TYPE_MANUAL_EVERY_WEEK:
+                    lTag.iClientIndex = lSchedule.Id;
+                    if ( lSchedule.ChannelId != -1 )
                     {
-                        struct tm lTimeInfo = *localtime( &lSchedule.StartTime );
-                        int       lWeekDay = lTimeInfo.tm_wday;    // days since Sunday [0-6]
-
-                                                                   // bit 0 = monday, need to convert weekday value to bitnumber:
-                        if (lWeekDay == 0)
-                            lWeekDay = 6;   // sunday 0100 0000
-                        else
-                            lWeekDay--;
-
-                        lTag.iMaxRecordings = 0;
-                        lTag.iWeekdays = 1 << lWeekDay;
+                        lTag.iClientChannelUid = lSchedule.ChannelId;
                     }
-                    break;
-                    case SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY:
-                        lTag.iMaxRecordings = 0;
-                        lTag.iWeekdays = 31; // 0001 1111
+                    else
+                    {
+                        lTag.iClientChannelUid = PVR_TIMER_ANY_CHANNEL;
+                    }
+                    lTag.iTimerType = lSchedule.Type;
+                    if ( lSchedule.Inactive )
+                    {
+                        lTag.state = PVR_TIMER_STATE_DISABLED;
+                    }
+                    else
+                    {
+                        lTag.state = PVR_TIMER_STATE_SCHEDULED;
+                    }
+
+                    strncpy( lTag.strTitle, lSchedule.Title.c_str(), sizeof( lTag.strTitle ) - 1 );
+                    strncpy( lTag.strDirectory, lSchedule.Title.c_str(), sizeof( lTag.strDirectory ) - 1 );
+
+                    switch ( lSchedule.Type )
+                    {
+                        case SCHEDULE_TYPE_ONCE_EVERY_DAY:
+                        case SCHEDULE_TYPE_ANY_TIME:
+                        case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
+                            strncpy( lTag.strEpgSearchString, lSchedule.Title.c_str(), sizeof( lTag.strEpgSearchString ) - 1 );
+                            lTag.bFullTextEpgSearch = true;
+                            break;
+                        case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
+                        case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
+                            strncpy( lTag.strEpgSearchString, lSchedule.Title.c_str(), sizeof( lTag.strEpgSearchString ) - 1 );
+                            lTag.bFullTextEpgSearch = true;
+                            lTag.startTime = lSchedule.StartTime;
+                            lTag.endTime = lSchedule.EndTime;
+                            break;
+                        case SCHEDULE_TYPE_MANUAL_EVERY_DAY:
+                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEK:
+                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY:
+                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND:
+                        case SCHEDULE_TYPE_ONCE:
+                        default:
+                            lTag.startTime = lSchedule.StartTime;
+                            lTag.endTime = lSchedule.EndTime;
+                            break;
+                    }
+
+                    lTag.iPriority = 0;
+                    lTag.iLifetime = 0;
+
+                    switch ( lSchedule.Type )
+                    {
+                        case SCHEDULE_TYPE_ONCE_EVERY_DAY:
+                        case SCHEDULE_TYPE_ANY_TIME:
+                        case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
+                        case SCHEDULE_TYPE_MANUAL_EVERY_DAY:
+                            lTag.iMaxRecordings = 0;
+                            lTag.iWeekdays = 0x7F; // 0111 1111
+                            break;
+                        case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
+                        case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
+                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEK:
+                        {
+                            struct tm lTimeInfo = *localtime( &lSchedule.StartTime );
+                            int       lWeekDay = lTimeInfo.tm_wday;    // days since Sunday [0-6]
+
+                                                                       // bit 0 = monday, need to convert weekday value to bitnumber:
+                            if ( lWeekDay == 0 )
+                                lWeekDay = 6;   // sunday 0100 0000
+                            else
+                                lWeekDay--;
+
+                            lTag.iMaxRecordings = 0;
+                            lTag.iWeekdays = 1 << lWeekDay;
+                        }
                         break;
-                    case SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND:
-                        lTag.iMaxRecordings = 0;
-                        lTag.iWeekdays = 96; // 0110 0000
-                        break;
-                    case SCHEDULE_TYPE_ONCE:
-                    default:
-                        lTag.iMaxRecordings = 1;
-                        lTag.iWeekdays = 0x7F; // 0111 1111
-                        break;
+                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY:
+                            lTag.iMaxRecordings = 0;
+                            lTag.iWeekdays = 31; // 0001 1111
+                            break;
+                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND:
+                            lTag.iMaxRecordings = 0;
+                            lTag.iWeekdays = 96; // 0110 0000
+                            break;
+                        case SCHEDULE_TYPE_ONCE:
+                        default:
+                            lTag.iMaxRecordings = 1;
+                            lTag.iWeekdays = 0x7F; // 0111 1111
+                            break;
+                    }
+
+                    switch ( lSchedule.Type )
+                    {
+                        case SCHEDULE_TYPE_ONCE_EVERY_DAY:
+                        case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
+                        case SCHEDULE_TYPE_ANY_TIME:
+                            lTag.bStartAnyTime = true;
+                            lTag.bEndAnyTime = true;
+                            break;
+                        default:
+                            break;
+                    }
+
+                    lTag.iPreventDuplicateEpisodes = lSchedule.DupMethod;
+                    lTag.firstDay = lSchedule.StartTime;
+                    lTag.iEpgUid = PVR_TIMER_NO_EPG_UID;
+                    lTag.iMarginStart = lSchedule.StartEarly;
+                    lTag.iMarginEnd = lSchedule.EndLate;
+                    lTag.iGenreType = 0;
+                    lTag.iGenreSubType = 0;
+
+                    XBMC->Log( LOG_DEBUG, "Found schedule: %s, Unique id: %d\n", lSchedule.Title.c_str(), lTag.iClientIndex );
+
+                    PVR->TransferTimerEntry( aHandle, &lTag );
                 }
-
-                switch ( lSchedule.Type )
-                {
-                    case SCHEDULE_TYPE_ONCE_EVERY_DAY:
-                    case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
-                    case SCHEDULE_TYPE_ANY_TIME:
-                        lTag.bStartAnyTime = true;
-                        lTag.bEndAnyTime = true;
-                        break;
-                    default:
-                        break;
-                }
-
-                lTag.iPreventDuplicateEpisodes = lSchedule.DupMethod;
-                lTag.firstDay = lSchedule.StartTime;
-                lTag.iEpgUid = PVR_TIMER_NO_EPG_UID;
-                lTag.iMarginStart = lSchedule.StartEarly;
-                lTag.iMarginEnd = lSchedule.EndLate;
-                lTag.iGenreType = 0;
-                lTag.iGenreSubType = 0;
-
-                XBMC->Log( LOG_DEBUG, "Found schedule: %s, Unique id: %d\n", lSchedule.Title.c_str(), lTag.iClientIndex );
-
-                PVR->TransferTimerEntry( aHandle, &lTag );
             }
             for ( unsigned int lRecordingPtr = 0; lRecordingPtr < ivScheduledRecordings.size(); lRecordingPtr++ )
             {
@@ -745,8 +760,13 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                 
                     memset( &lTag, 0, sizeof( lTag ) );
 
-                    lTag.iClientIndex       = 0xF000000 + lRecording.Id;                // This is timerId, not actual recordingId
-                    lTag.iParentClientIndex = lSchedule.Id;
+                    // Todo: this is a hack, we need unique iClientIndex, for now use a big offset
+                    lTag.iClientIndex       = 0xF000000 + lRecording.Id;
+                    // When it is a schedule once timer, there is no parent, so only specify it for other types of timers
+                    if ( lSchedule.Type != SCHEDULE_TYPE_ONCE )
+                    {
+                        lTag.iParentClientIndex = lSchedule.Id;
+                    }
                     lTag.iTimerType         = lSchedule.Type;
                     if ( lSchedule.ChannelId != -1 )
                     {
@@ -756,8 +776,6 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                     {
                         lTag.iClientChannelUid = PVR_TIMER_ANY_CHANNEL;
                     }
-                    lTag.startTime          = lRecording.StartTime;
-                    lTag.endTime            = lRecording.EndTime;
 
                     switch ( lRecording.Status )
                     {
@@ -804,21 +822,30 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                     {
                         case SCHEDULE_TYPE_ONCE_EVERY_DAY:
                         case SCHEDULE_TYPE_ANY_TIME:
-                        case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
-                        case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
                         case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
-                        case SCHEDULE_TYPE_ONCE:
                             strncpy( lTag.strEpgSearchString, lSchedule.Title.c_str(), sizeof( lTag.strEpgSearchString ) - 1 );
                             lTag.bFullTextEpgSearch = true;
                             break;
+                        case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
+                        case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
+                            strncpy( lTag.strEpgSearchString, lSchedule.Title.c_str(), sizeof( lTag.strEpgSearchString ) - 1 );
+                            lTag.bFullTextEpgSearch = true;
+                            lTag.startTime = lRecording.StartTime;
+                            lTag.endTime = lRecording.EndTime;
+                            break;
+                        case SCHEDULE_TYPE_MANUAL_EVERY_DAY:
+                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEK:
+                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY:
+                        case SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND:
+                        case SCHEDULE_TYPE_ONCE:
                         default:
+                            lTag.startTime = lRecording.StartTime;
+                            lTag.endTime = lRecording.EndTime;
                             break;
                     }
 
                     lTag.iPriority = 0;
                     lTag.iLifetime = 0;
-                    lTag.bStartAnyTime = false;
-                    lTag.bEndAnyTime = false;
 
                     switch ( lSchedule.Type )
                     {
@@ -912,7 +939,6 @@ PVR_ERROR AminoPVRData::AddTimer( const PVR_TIMER & aTimer )
         case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
         case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
         case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
-        case SCHEDULE_TYPE_ONCE:
             lSchedule.Title.Format( "%s", aTimer.strEpgSearchString );
             break;
         default:
@@ -1119,7 +1145,7 @@ void AminoPVRData::CreateEpgEntry( Json::Value aJson, AminoPVREpgEntry & aEpgEnt
     aEpgEntry.ParentalRating    = aJson["parental_rating"].asString();
 
     // TODO: process all genres
-    Json::Value lGenres = aJson["genre"];
+    Json::Value lGenres = aJson["genres"];
     if ( lGenres.size() > 0 )
     {
         aEpgEntry.Genres.push_back( lGenres[(Json::Value::UInt)0].asString() );

@@ -19,6 +19,7 @@
  *
  */
 
+#include "xbmc_epg_types.h"
 #include "categories.h"
 
 Categories::Categories()
@@ -51,22 +52,22 @@ int Categories::Category(const std::string &category) const
 CategoryByIdMap Categories::DefaultEITCategories() const
 {
   CategoryByIdMap categoryMap;
-  categoryMap.insert(std::pair<int, std::string>(0x10, "Film"));
-  categoryMap.insert(std::pair<int, std::string>(0x11, "Crime/Mystery"));
-  categoryMap.insert(std::pair<int, std::string>(0x1F, "Drama"));
-  categoryMap.insert(std::pair<int, std::string>(0x20, "News"));
-  categoryMap.insert(std::pair<int, std::string>(0x23, "Documentary"));
-  categoryMap.insert(std::pair<int, std::string>(0x40, "Sports"));
-  categoryMap.insert(std::pair<int, std::string>(0x50, "Children"));
-  categoryMap.insert(std::pair<int, std::string>(0x54, "Educational"));
-  categoryMap.insert(std::pair<int, std::string>(0x60, "Music"));
-  categoryMap.insert(std::pair<int, std::string>(0x70, "Arts/Culture"));
-  categoryMap.insert(std::pair<int, std::string>(0x73, "Religion"));
-  categoryMap.insert(std::pair<int, std::string>(0x90, "Science/Nature"));
-  categoryMap.insert(std::pair<int, std::string>(0x55, "Animated"));
-  categoryMap.insert(std::pair<int, std::string>(0xC8, "Adulty"));
-  categoryMap.insert(std::pair<int, std::string>(0xC4, "Comedy"));
-  categoryMap.insert(std::pair<int, std::string>(0x00, "Unknown"));
-
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_NEWSCURRENTAFFAIRS, "News" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_SPORTS, "Sports" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_MUSICBALLETDANCE, "Music" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_EDUCATIONALSCIENCE | 0x04, "Educational" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_ARTSCULTURE, "Arts/Culture" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_SHOW | 0x03, "Talk" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_CHILDRENYOUTH, "Children" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_EDUCATIONALSCIENCE, "Science/Nature" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_NEWSCURRENTAFFAIRS | 0x03, "Documentary" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_MOVIEDRAMA | 0x01, "Crime/Mystery" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_MOVIEDRAMA | 0x07, "Drama" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_MOVIEDRAMA, "Film" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_MOVIEDRAMA | 0x04, "Comedy" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_ARTSCULTURE | 0x03, "Religion" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_UNDEFINED, "Unknown" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_MOVIEDRAMA | 0x08, "Adult" ) );
+  categoryMap.insert( std::pair<int, std::string>( EPG_EVENT_CONTENTMASK_CHILDRENYOUTH | 0x05, "Animated" ) );
   return categoryMap;
 }
