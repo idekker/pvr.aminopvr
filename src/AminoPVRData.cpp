@@ -51,6 +51,35 @@ bool CCurlFile::Post( const CStdString & aUrl, const CStdString & aArguments, CS
     return false;
 }
 
+bool CCurlFile::Put( const CStdString & aUrl, const CStdString & aArguments, CStdString & aResult )
+{
+    //void * lpFileHandle = XBMC->OpenFileForWrite( aUrl.c_str(), true );
+    //if ( lpFileHandle )
+    //{
+    //    char lpBuffer[1024];
+    //    XBMC->WriteFile( lpFileHandle, aArguments.c_str(), aArguments.length() );
+    //    while ( XBMC->ReadFileString( lpFileHandle, lpBuffer, 1024 ) )
+    //        aResult.append( lpBuffer );
+    //    XBMC->CloseFile( lpFileHandle );
+    //    return true;
+    //}
+    return false;
+}
+
+bool CCurlFile::Delete( const CStdString & aUrl, CStdString & aResult )
+{
+    //void * lpFileHandle = XBMC->OpenFileForWrite( aUrl.c_str(), true );
+    //if ( lpFileHandle )
+    //{
+    //    char lpBuffer[1024];
+    //    while ( XBMC->ReadFileString( lpFileHandle, lpBuffer, 1024 ) )
+    //        aResult.append( lpBuffer );
+    //    XBMC->CloseFile( lpFileHandle );
+    //    return true;
+    //}
+    return false;
+}
+
 AminoPVRData::AminoPVRData( void )
   : ivCategories()
 {
@@ -263,6 +292,14 @@ PVR_ERROR AminoPVRData::GetEPGForChannel( ADDON_HANDLE aHandle, const PVR_CHANNE
                     lTag.iGenreType    = 0;
                     lTag.iGenreSubType = 0;
                 }
+                vector<CStdString> lActorsAndPresenters = lEpgEntry.Actors;
+                lActorsAndPresenters.insert( lActorsAndPresenters.end(), lEpgEntry.Presenters.begin(), lEpgEntry.Presenters.end() );
+                CStdString lCast;
+                CStdString lDirector;
+                join( lActorsAndPresenters, ',', lCast );
+                join( lEpgEntry.Directors, ',', lDirector );
+                lTag.strCast = lCast.c_str();
+                lTag.strDirector = lDirector.c_str();
 
                 PVR->TransferEpgEntry( aHandle, &lTag );
                 lChannel.EpgEntries.push_back( lEpgEntry );
@@ -572,7 +609,7 @@ int AminoPVRData::GetTimersAmount( void )
     int         lNumSchedules = 0;
     Json::Value lResponse;
     XBMC->Log( LOG_DEBUG, "%s()", __FUNCTION__ );
-    if ( GrabAndParse( ConstructUrl( "/api/schedules/getScheduleList" ), lResponse ) )
+    if ( GrabAndParse( ConstructUrl( "/api/timers/" ), lResponse ) )
     {
         lNumSchedules = lResponse.size();
     }
@@ -585,7 +622,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
     XBMC->Log( LOG_DEBUG, "%s()", __FUNCTION__ );
 
     Json::Value lResponse;
-    if ( GrabAndParse( ConstructUrl( "/api/schedules/getScheduleList" ), lResponse ) )
+    if ( GrabAndParse( ConstructUrl( "/api/timers/" ), lResponse ) )
     {
         int lSize = lResponse.size();
 
@@ -971,7 +1008,7 @@ PVR_ERROR AminoPVRData::AddTimer( const PVR_TIMER & aTimer )
 
     lArguments["schedule"] = lWriter.write( lJson );
 
-    if ( PostAndParse( ConstructUrl( "/api/schedules/addSchedule" ), lArguments, lResponse, false ) )
+    if ( PostAndParse( ConstructUrl( "/api/timers/" ), lArguments, lResponse, false ) )
     {
         return PVR_ERROR_NO_ERROR;
     }
@@ -990,7 +1027,7 @@ PVR_ERROR AminoPVRData::DeleteTimer( const PVR_TIMER & aTimer, bool aForceDelete
             continue;
 
         CStdString lPath;
-        lPath.Format( "/api/schedules/deleteSchedules/%i", lScheduleId );
+        lPath.Format( "/api/timers/%i", lScheduleId );
         Json::Value lResponse;
         if ( GrabAndParse( ConstructUrl( lPath ), lResponse, false ) )
         {
@@ -1076,6 +1113,62 @@ bool AminoPVRData::PostAndParse( const CStdString aUrl, Json::Value aArguments, 
     if ( !lHttp.Post( aUrl, lData, lJson ) )
     {
         XBMC->Log( LOG_ERROR, "%s: Could not open connection to AminoPVR backend: aUrl=%s, aArguments=%s\n", __FUNCTION__, aUrl.c_str(), aArguments.toStyledString().c_str() );
+    }
+    else
+    {
+        if ( ParseResponse( lJson, aResponse, aExpectData ) )
+        {
+            lResult = true;
+        }
+        else
+        {
+            XBMC->Log( LOG_ERROR, "%s: failed: aUrl=%s, lJson=%s\n", __FUNCTION__, aUrl.c_str(), lJson.c_str() );
+        }
+    }
+
+    return lResult;
+}
+
+bool AminoPVRData::PutAndParse( const CStdString aUrl, Json::Value aArguments, Json::Value & aResponse, bool aExpectData )
+{
+    bool                lResult = false;
+    Json::FastWriter    lWriter;
+    CStdString          lJson;
+    CCurlFile           lHttp;
+    CStdString          lData;
+
+    if ( aArguments.isString() )
+    {
+        lData.Format( "%s=%s", aArguments.asString().c_str(), lWriter.write( aArguments[aArguments.asString()] ) );
+    }
+
+    if ( !lHttp.Put( aUrl, lData, lJson ) )
+    {
+        XBMC->Log( LOG_ERROR, "%s: Could not open connection to AminoPVR backend: aUrl=%s, aArguments=%s\n", __FUNCTION__, aUrl.c_str(), aArguments.toStyledString().c_str() );
+    }
+    else
+    {
+        if ( ParseResponse( lJson, aResponse, aExpectData ) )
+        {
+            lResult = true;
+        }
+        else
+        {
+            XBMC->Log( LOG_ERROR, "%s: failed: aUrl=%s, lJson=%s\n", __FUNCTION__, aUrl.c_str(), lJson.c_str() );
+        }
+    }
+
+    return lResult;
+}
+
+bool AminoPVRData::DeleteAndParse( const CStdString aUrl, Json::Value & aResponse, bool aExpectData )
+{
+    bool       lResult = false;
+    CStdString lJson;
+    CCurlFile  lHttp;
+    if ( !lHttp.Delete( aUrl, lJson ) )
+    {
+        XBMC->Log( LOG_ERROR, "%s: Could not open connection to AminoPVR backend: aUrl=%s\n", __FUNCTION__, aUrl.c_str() );
     }
     else
     {
@@ -1241,4 +1334,16 @@ void AminoPVRData::CreateScheduleJson( AminoPVRSchedule aSchedule, Json::Value &
     aJson["start_early"]        = Json::Value( aSchedule.StartEarly );
     aJson["end_late"]           = Json::Value( aSchedule.EndLate );
     aJson["inactive"]           = Json::Value( aSchedule.Inactive );
+}
+
+void AminoPVRData::join( const vector<CStdString>& v, char c, CStdString& s )
+{
+    s.clear();
+
+    for ( vector<CStdString>::const_iterator p = v.begin(); p != v.end(); ++p )
+    {
+        s += *p;
+        if ( p != v.end() - 1 )
+            s += c;
+    }
 }

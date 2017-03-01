@@ -132,6 +132,8 @@ public:
 
     bool Get( const CStdString & aUrl, CStdString & aResult );
     bool Post( const CStdString & aUrl, const CStdString & aArguments, CStdString & aResult );
+    bool Put( const CStdString & aUrl, const CStdString & aArguments, CStdString & aResult );
+    bool Delete( const CStdString & aUrl, CStdString & aResult );
 };
 
 class AminoPVRData
@@ -166,6 +168,8 @@ private:
     CStdString ConstructUrl( const CStdString aPath, const CStdString aArguments="", bool aUseApiKey=true );
     bool       GrabAndParse( const CStdString aUrl, Json::Value & aResponse, bool aExpectData=true );
     bool       PostAndParse( const CStdString aUrl, Json::Value aArguments, Json::Value & aResponse, bool aExpectData=true );
+    bool       PutAndParse( const CStdString aUrl, Json::Value aArguments, Json::Value & aResponse, bool aExpectData = true );
+    bool       DeleteAndParse( const CStdString aUrl, Json::Value & aResponse, bool aExpectData = true );
     bool       ParseResponse( CStdString aJsonString, Json::Value & aJson, bool aExpectData=true );
 
     void       CreateChannelEntry( Json::Value aJson, AminoPVRChannel & aChannel );
@@ -173,6 +177,8 @@ private:
     void       CreateEpgEntry( Json::Value aJson, AminoPVREpgEntry & aEpgEntry );
     void       CreateScheduleEntry( Json::Value aJson, AminoPVRSchedule & aSchedule );
     void       CreateScheduleJson( AminoPVRSchedule aSchedule, Json::Value & aJson );
+
+    void       join( const std::vector<CStdString>& v, char c, CStdString& s );
 
     // Categories
     Categories                      ivCategories;
