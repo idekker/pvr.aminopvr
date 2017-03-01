@@ -1,6 +1,6 @@
 /*
  *  This file is part of AminoPVR.
- *  Copyright (C) 2012  Ino Dekker
+ *  Copyright (C) 2012-2017  Ino Dekker
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,67 +18,10 @@
  */
 
 #include "AminoPVRData.h"
+#include "HttpClient.h"
 
 using namespace std;
 using namespace ADDON;
-
-bool CCurlFile::Get( const CStdString & aUrl, CStdString & aResult )
-{
-    void * lpFileHandle = XBMC->OpenFile( aUrl.c_str(), 0 );
-    if ( lpFileHandle )
-    {
-        char lpBuffer[1024];
-        while ( XBMC->ReadFileString( lpFileHandle, lpBuffer, 1024 ) )
-            aResult.append( lpBuffer );
-        XBMC->CloseFile( lpFileHandle );
-        return true;
-    }
-    return false;
-}
-
-bool CCurlFile::Post( const CStdString & aUrl, const CStdString & aArguments, CStdString & aResult )
-{
-    void * lpFileHandle = XBMC->OpenFileForWrite( aUrl.c_str(), true );
-    if ( lpFileHandle )
-    {
-        char lpBuffer[1024];
-        XBMC->WriteFile( lpFileHandle, aArguments.c_str(), aArguments.length() );
-        while ( XBMC->ReadFileString( lpFileHandle, lpBuffer, 1024 ) )
-            aResult.append( lpBuffer );
-        XBMC->CloseFile( lpFileHandle );
-        return true;
-    }
-    return false;
-}
-
-bool CCurlFile::Put( const CStdString & aUrl, const CStdString & aArguments, CStdString & aResult )
-{
-    //void * lpFileHandle = XBMC->OpenFileForWrite( aUrl.c_str(), true );
-    //if ( lpFileHandle )
-    //{
-    //    char lpBuffer[1024];
-    //    XBMC->WriteFile( lpFileHandle, aArguments.c_str(), aArguments.length() );
-    //    while ( XBMC->ReadFileString( lpFileHandle, lpBuffer, 1024 ) )
-    //        aResult.append( lpBuffer );
-    //    XBMC->CloseFile( lpFileHandle );
-    //    return true;
-    //}
-    return false;
-}
-
-bool CCurlFile::Delete( const CStdString & aUrl, CStdString & aResult )
-{
-    //void * lpFileHandle = XBMC->OpenFileForWrite( aUrl.c_str(), true );
-    //if ( lpFileHandle )
-    //{
-    //    char lpBuffer[1024];
-    //    while ( XBMC->ReadFileString( lpFileHandle, lpBuffer, 1024 ) )
-    //        aResult.append( lpBuffer );
-    //    XBMC->CloseFile( lpFileHandle );
-    //    return true;
-    //}
-    return false;
-}
 
 AminoPVRData::AminoPVRData( void )
   : ivCategories()
@@ -999,16 +942,12 @@ PVR_ERROR AminoPVRData::AddTimer( const PVR_TIMER & aTimer )
             break;
     }
 
-    Json::Value         lJson;
-    Json::FastWriter    lWriter;
-    Json::Value         lResponse;
-    Json::Value         lArguments;
+    Json::Value lJson;
+    Json::Value lResponse;
 
     CreateScheduleJson( lSchedule, lJson );
 
-    lArguments["schedule"] = lWriter.write( lJson );
-
-    if ( PostAndParse( ConstructUrl( "/api/timers/" ), lArguments, lResponse, false ) )
+    if ( PostAndParse( ConstructUrl( "/api/timers/" ), lJson, lResponse, false ) )
     {
         return PVR_ERROR_NO_ERROR;
     }
@@ -1051,7 +990,8 @@ CStdString AminoPVRData::ConstructUrl( const CStdString aPath, const CStdString 
 {
     CStdString lUrl;
 
-    lUrl.Format( "http://%s:%i%s", g_strHostname.c_str(), g_iPort, aPath.c_str() );
+//    lUrl.Format( "http://%s:%i%s", g_strHostname.c_str(), g_iPort, aPath.c_str() );
+    lUrl.Format( "%s", aPath.c_str() );
 
     if ( aUseApiKey )
     {
@@ -1077,13 +1017,15 @@ bool AminoPVRData::GrabAndParse( const CStdString aUrl, Json::Value & aResponse,
 {
     bool       lResult = false;
     CStdString lJson;
-    CCurlFile  lHttp;
-    if ( !lHttp.Get( aUrl, lJson ) )
+    HttpClient lHttp( g_strHostname, g_iPort );
+    HttpRequest lRequest( aUrl, HTTP_GET_METHOD );
+    if ( !lHttp.Request( lRequest ) )
     {
         XBMC->Log( LOG_ERROR, "%s: Could not open connection to AminoPVR backend: aUrl=%s\n", __FUNCTION__, aUrl.c_str() );
     }
     else
     {
+        lJson = lHttp.GetResponse()->GetResponseData();
         if ( ParseResponse( lJson, aResponse, aExpectData ) )
         {
             lResult = true;
@@ -1102,20 +1044,18 @@ bool AminoPVRData::PostAndParse( const CStdString aUrl, Json::Value aArguments, 
     bool                lResult = false;
     Json::FastWriter    lWriter;
     CStdString          lJson;
-    CCurlFile           lHttp;
-    CStdString          lData;
+    HttpClient lHttp( g_strHostname, g_iPort );
+    HttpRequest lRequest( aUrl, HTTP_POST_METHOD );
 
-    if ( aArguments.isString() )
-    {
-        lData.Format( "%s=%s", aArguments.asString().c_str(), lWriter.write( aArguments[aArguments.asString()] ) );
-    }
+    lRequest.SetRequestData( lWriter.write( aArguments ) );
 
-    if ( !lHttp.Post( aUrl, lData, lJson ) )
+    if ( !lHttp.Request( lRequest ) )
     {
         XBMC->Log( LOG_ERROR, "%s: Could not open connection to AminoPVR backend: aUrl=%s, aArguments=%s\n", __FUNCTION__, aUrl.c_str(), aArguments.toStyledString().c_str() );
     }
     else
     {
+        lJson = lHttp.GetResponse()->GetResponseData();
         if ( ParseResponse( lJson, aResponse, aExpectData ) )
         {
             lResult = true;
@@ -1134,15 +1074,12 @@ bool AminoPVRData::PutAndParse( const CStdString aUrl, Json::Value aArguments, J
     bool                lResult = false;
     Json::FastWriter    lWriter;
     CStdString          lJson;
-    CCurlFile           lHttp;
-    CStdString          lData;
+    HttpClient lHttp( g_strHostname, g_iPort );
+    HttpRequest lRequest( aUrl, HTTP_PUT_METHOD );
 
-    if ( aArguments.isString() )
-    {
-        lData.Format( "%s=%s", aArguments.asString().c_str(), lWriter.write( aArguments[aArguments.asString()] ) );
-    }
+    lRequest.SetRequestData( lWriter.write( aArguments ) );
 
-    if ( !lHttp.Put( aUrl, lData, lJson ) )
+    if ( !lHttp.Request( lRequest ) )
     {
         XBMC->Log( LOG_ERROR, "%s: Could not open connection to AminoPVR backend: aUrl=%s, aArguments=%s\n", __FUNCTION__, aUrl.c_str(), aArguments.toStyledString().c_str() );
     }
@@ -1165,8 +1102,9 @@ bool AminoPVRData::DeleteAndParse( const CStdString aUrl, Json::Value & aRespons
 {
     bool       lResult = false;
     CStdString lJson;
-    CCurlFile  lHttp;
-    if ( !lHttp.Delete( aUrl, lJson ) )
+    HttpClient lHttp( g_strHostname, g_iPort );
+    HttpRequest lRequest( aUrl, HTTP_DELETE_METHOD );
+    if ( !lHttp.Request( lRequest ) )
     {
         XBMC->Log( LOG_ERROR, "%s: Could not open connection to AminoPVR backend: aUrl=%s\n", __FUNCTION__, aUrl.c_str() );
     }

@@ -22,11 +22,13 @@ endif()
 # Source files
 set(AMINOPVR_SOURCES src/client.cpp
                      src/categories.cpp
+                     src/HttpClient.cpp
                      src/AminoPVRData.cpp)
 
 # Header files
 set(AMINOPVR_HEADERS src/client.h
                      src/categories.h
+                     src/HttpClient.h
                      src/AminoPVRData.h)
 source_group("Header Files" FILES ${AMINOPVR_HEADERS})
 
@@ -50,5 +52,9 @@ list(APPEND INCLUDES ${JSONCPP_INCLUDE_DIRS})
 include_directories(${INCLUDES})
 
 build_addon(pvr.aminopvr AMINOPVR DEPLIBS)
+
+if(WIN32)
+    target_link_libraries(pvr.aminopvr ws2_32)
+endif() 
 
 include(CPack)
