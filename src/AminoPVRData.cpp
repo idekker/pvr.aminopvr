@@ -421,10 +421,10 @@ int AminoPVRData::GetRecordingLastPlayedPosition( const PVR_RECORDING & aRecordi
 
 PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
 {
-    *size = 10;
+    *size = 11;
 
     types[0].iId = SCHEDULE_TYPE_ONCE;
-    types[0].iAttributes = PVR_TIMER_TYPE_IS_MANUAL | PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_START_TIME | PVR_TIMER_TYPE_SUPPORTS_END_TIME | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
+    types[0].iAttributes = PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_TITLE_EPG_MATCH | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
     strncpy(types[0].strDescription, "Record once", sizeof(types[0].strDescription) - 1);
     types[0].iPrioritiesSize = 0;
     types[0].iLifetimesSize = 0;
@@ -445,7 +445,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     strncpy(types[0].preventDuplicateEpisodes[6].strDescription, "Prevent duplicates based on subtitle and description", sizeof(types[0].preventDuplicateEpisodes[6].strDescription) - 1);
     types[0].preventDuplicateEpisodes[7].iValue = DUPLICATION_METHOD_TITLE | DUPLICATION_METHOD_SUBTITLE | DUPLICATION_METHOD_DESCRIPTION;
     strncpy(types[0].preventDuplicateEpisodes[7].strDescription, "Prevent duplicates based on title, subtitle and description", sizeof(types[0].preventDuplicateEpisodes[7].strDescription) - 1);
-    types[0].iPreventDuplicateEpisodesDefault = 1;
+    types[0].iPreventDuplicateEpisodesDefault = 0;
     types[0].iRecordingGroupSize = 0;
     types[0].iMaxRecordingsSize = 0;
 
@@ -456,7 +456,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[1].iLifetimesSize = 0;
     types[1].iPreventDuplicateEpisodesSize = 8;
     memcpy_s( types[1].preventDuplicateEpisodes, sizeof( types[1].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
-    types[1].iPreventDuplicateEpisodesDefault = 1;
+    types[1].iPreventDuplicateEpisodesDefault = 0;
     types[1].iRecordingGroupSize = 0;
     types[1].iMaxRecordingsSize = 0;
 
@@ -467,7 +467,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[2].iLifetimesSize = 0;
     types[2].iPreventDuplicateEpisodesSize = 8;
     memcpy_s( types[2].preventDuplicateEpisodes, sizeof( types[2].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
-    types[2].iPreventDuplicateEpisodesDefault = 1;
+    types[2].iPreventDuplicateEpisodesDefault = 0;
     types[2].iRecordingGroupSize = 0;
     types[2].iMaxRecordingsSize = 0;
 
@@ -478,7 +478,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[3].iLifetimesSize = 0;
     types[3].iPreventDuplicateEpisodesSize = 8;
     memcpy_s( types[3].preventDuplicateEpisodes, sizeof( types[3].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
-    types[3].iPreventDuplicateEpisodesDefault = 1;
+    types[3].iPreventDuplicateEpisodesDefault = 0;
     types[3].iRecordingGroupSize = 0;
     types[3].iMaxRecordingsSize = 0;
 
@@ -489,7 +489,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[4].iLifetimesSize = 0;
     types[4].iPreventDuplicateEpisodesSize = 8;
     memcpy_s( types[4].preventDuplicateEpisodes, sizeof( types[4].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
-    types[4].iPreventDuplicateEpisodesDefault = 1;
+    types[4].iPreventDuplicateEpisodesDefault = 0;
     types[4].iRecordingGroupSize = 0;
     types[4].iMaxRecordingsSize = 0;
 
@@ -500,7 +500,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[5].iLifetimesSize = 0;
     types[5].iPreventDuplicateEpisodesSize = 8;
     memcpy_s( types[5].preventDuplicateEpisodes, sizeof( types[5].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
-    types[5].iPreventDuplicateEpisodesDefault = 1;
+    types[5].iPreventDuplicateEpisodesDefault = 0;
     types[5].iRecordingGroupSize = 0;
     types[5].iMaxRecordingsSize = 0;
 
@@ -511,7 +511,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[6].iLifetimesSize = 0;
     types[6].iPreventDuplicateEpisodesSize = 8;
     memcpy_s( types[6].preventDuplicateEpisodes, sizeof( types[6].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
-    types[6].iPreventDuplicateEpisodesDefault = 1;
+    types[6].iPreventDuplicateEpisodesDefault = 0;
     types[6].iRecordingGroupSize = 0;
     types[6].iMaxRecordingsSize = 0;
 
@@ -522,7 +522,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[7].iLifetimesSize = 0;
     types[7].iPreventDuplicateEpisodesSize = 8;
     memcpy_s( types[7].preventDuplicateEpisodes, sizeof( types[7].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
-    types[7].iPreventDuplicateEpisodesDefault = 1;
+    types[7].iPreventDuplicateEpisodesDefault = 0;
     types[7].iRecordingGroupSize = 0;
     types[7].iMaxRecordingsSize = 0;
 
@@ -533,7 +533,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[8].iLifetimesSize = 0;
     types[8].iPreventDuplicateEpisodesSize = 8;
     memcpy_s( types[8].preventDuplicateEpisodes, sizeof( types[8].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
-    types[8].iPreventDuplicateEpisodesDefault = 1;
+    types[8].iPreventDuplicateEpisodesDefault = 0;
     types[8].iRecordingGroupSize = 0;
     types[8].iMaxRecordingsSize = 0;
 
@@ -544,10 +544,21 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[9].iLifetimesSize = 0;
     types[9].iPreventDuplicateEpisodesSize = 8;
     memcpy_s( types[9].preventDuplicateEpisodes, sizeof( types[9].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
-    types[9].iPreventDuplicateEpisodesDefault = 1;
+    types[9].iPreventDuplicateEpisodesDefault = 0;
     types[9].iRecordingGroupSize = 0;
     types[9].iMaxRecordingsSize = 0;
-    
+
+    types[10].iId = SCHEDULE_TYPE_MANUAL_ONCE;
+    types[10].iAttributes = PVR_TIMER_TYPE_IS_MANUAL | PVR_TIMER_TYPE_SUPPORTS_CHANNELS | PVR_TIMER_TYPE_SUPPORTS_START_TIME | PVR_TIMER_TYPE_SUPPORTS_END_TIME | PVR_TIMER_TYPE_SUPPORTS_ENABLE_DISABLE | PVR_TIMER_TYPE_SUPPORTS_START_END_MARGIN;
+    strncpy( types[10].strDescription, "Manual record once", sizeof( types[10].strDescription ) - 1 );
+    types[10].iPrioritiesSize = 0;
+    types[10].iLifetimesSize = 0;
+    types[10].iPreventDuplicateEpisodesSize = 8;
+    memcpy_s( types[10].preventDuplicateEpisodes, sizeof( types[10].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    types[10].iPreventDuplicateEpisodesDefault = 0;
+    types[10].iRecordingGroupSize = 0;
+    types[10].iMaxRecordingsSize = 0;
+
     return PVR_ERROR_NO_ERROR;
 }
 
@@ -609,7 +620,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                  * When they are in the future, there should be a scheduled recording for it, which are processed next.
                  * For that reason we don't have to add them as a schedule.
                  */
-                if ( lSchedule.Type != SCHEDULE_TYPE_ONCE )
+                if ( lSchedule.Type != SCHEDULE_TYPE_MANUAL_ONCE )
                 {
                     PVR_TIMER lTag;
                     memset( &lTag, 0, sizeof( lTag ) );
@@ -641,6 +652,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                         case SCHEDULE_TYPE_ONCE_EVERY_DAY:
                         case SCHEDULE_TYPE_ANY_TIME:
                         case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
+                        case SCHEDULE_TYPE_ONCE:
                             strncpy( lTag.strEpgSearchString, lSchedule.Title.c_str(), sizeof( lTag.strEpgSearchString ) - 1 );
                             lTag.bFullTextEpgSearch = true;
                             break;
@@ -655,7 +667,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                         case SCHEDULE_TYPE_MANUAL_EVERY_WEEK:
                         case SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY:
                         case SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND:
-                        case SCHEDULE_TYPE_ONCE:
+                        case SCHEDULE_TYPE_MANUAL_ONCE:
                         default:
                             lTag.startTime = lSchedule.StartTime;
                             lTag.endTime = lSchedule.EndTime;
@@ -700,6 +712,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                             lTag.iWeekdays = 96; // 0110 0000
                             break;
                         case SCHEDULE_TYPE_ONCE:
+                        case SCHEDULE_TYPE_MANUAL_ONCE:
                         default:
                             lTag.iMaxRecordings = 1;
                             lTag.iWeekdays = 0x7F; // 0111 1111
@@ -711,6 +724,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                         case SCHEDULE_TYPE_ONCE_EVERY_DAY:
                         case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
                         case SCHEDULE_TYPE_ANY_TIME:
+                        case SCHEDULE_TYPE_ONCE:
                             lTag.bStartAnyTime = true;
                             lTag.bEndAnyTime = true;
                             break;
@@ -721,8 +735,8 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                     lTag.iPreventDuplicateEpisodes = lSchedule.DupMethod;
                     lTag.firstDay = lSchedule.StartTime;
                     lTag.iEpgUid = PVR_TIMER_NO_EPG_UID;
-                    lTag.iMarginStart = lSchedule.StartEarly;
-                    lTag.iMarginEnd = lSchedule.EndLate;
+                    lTag.iMarginStart = lSchedule.StartEarly / 60;
+                    lTag.iMarginEnd = lSchedule.EndLate / 60;
                     lTag.iGenreType = 0;
                     lTag.iGenreSubType = 0;
 
@@ -810,6 +824,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                         case SCHEDULE_TYPE_ONCE_EVERY_DAY:
                         case SCHEDULE_TYPE_ANY_TIME:
                         case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
+                        case SCHEDULE_TYPE_ONCE:
                             strncpy( lTag.strEpgSearchString, lSchedule.Title.c_str(), sizeof( lTag.strEpgSearchString ) - 1 );
                             lTag.bFullTextEpgSearch = true;
                             break;
@@ -824,7 +839,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                         case SCHEDULE_TYPE_MANUAL_EVERY_WEEK:
                         case SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY:
                         case SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND:
-                        case SCHEDULE_TYPE_ONCE:
+                        case SCHEDULE_TYPE_MANUAL_ONCE:
                         default:
                             lTag.startTime = lRecording.StartTime;
                             lTag.endTime = lRecording.EndTime;
@@ -869,6 +884,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                             lTag.iWeekdays = 96; // 0110 0000
                             break;
                         case SCHEDULE_TYPE_ONCE:
+                        case SCHEDULE_TYPE_MANUAL_ONCE:
                         default:
                             lTag.iMaxRecordings = 1;
                             lTag.iWeekdays = 0x7F; // 0111 1111
@@ -880,6 +896,7 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                         case SCHEDULE_TYPE_ONCE_EVERY_DAY:
                         case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
                         case SCHEDULE_TYPE_ANY_TIME:
+                        case SCHEDULE_TYPE_ONCE:
                             lTag.bStartAnyTime = true;
                             lTag.bEndAnyTime = true;
                             break;
@@ -890,8 +907,8 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                     lTag.iPreventDuplicateEpisodes = lSchedule.DupMethod;
                     lTag.firstDay       = lSchedule.StartTime;
                     lTag.iEpgUid        = lRecording.EpgProgramId;
-                    lTag.iMarginStart   = lSchedule.StartEarly;
-                    lTag.iMarginEnd     = lSchedule.EndLate;
+                    lTag.iMarginStart   = lSchedule.StartEarly / 60;
+                    lTag.iMarginEnd     = lSchedule.EndLate / 60;
                     lTag.iGenreType     = 0;
                     lTag.iGenreSubType  = 0;
 
@@ -919,6 +936,8 @@ PVR_ERROR AminoPVRData::AddTimer( const PVR_TIMER & aTimer )
     lSchedule.Id                = -1;
     lSchedule.ChannelId         = aTimer.iClientChannelUid;
     lSchedule.Type              = (ScheduleType)aTimer.iTimerType;
+
+    lSchedule.Title.Format( "%s", aTimer.strTitle );
     switch ( lSchedule.Type )
     {
         case SCHEDULE_TYPE_ONCE_EVERY_DAY:
@@ -926,16 +945,19 @@ PVR_ERROR AminoPVRData::AddTimer( const PVR_TIMER & aTimer )
         case SCHEDULE_TYPE_TIMESLOT_EVERY_DAY:
         case SCHEDULE_TYPE_TIMESLOT_EVERY_WEEK:
         case SCHEDULE_TYPE_ONCE_EVERY_WEEK:
-            lSchedule.Title.Format( "%s", aTimer.strEpgSearchString );
+        case SCHEDULE_TYPE_ONCE:
+            if ( strcmp( aTimer.strEpgSearchString, "" ) != 0 )
+            {
+                lSchedule.Title.Format( "%s", aTimer.strEpgSearchString );
+            }
             break;
         default:
-            lSchedule.Title.Format( "%s", aTimer.strTitle );
             break;
     }
     lSchedule.StartTime         = aTimer.startTime;
     lSchedule.EndTime           = aTimer.endTime;
-    lSchedule.StartEarly        = aTimer.iMarginStart;
-    lSchedule.EndLate           = aTimer.iMarginEnd;
+    lSchedule.StartEarly        = aTimer.iMarginStart * 60;
+    lSchedule.EndLate           = aTimer.iMarginEnd * 60;
     lSchedule.PreferHd          = true;
     lSchedule.PreferUnscrambled = false;
     lSchedule.DupMethod         = (DuplicationType)aTimer.iPreventDuplicateEpisodes;
