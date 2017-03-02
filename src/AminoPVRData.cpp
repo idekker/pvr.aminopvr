@@ -95,9 +95,9 @@ int AminoPVRData::GetChannelsAmount( void )
     int         lNumChannels = 0;
     Json::Value lResponse;
 
-    if ( GrabAndParse( ConstructUrl( "/api/channels/getNumChannels" ), lResponse ) )
+    if ( GrabAndParse( ConstructUrl( "/api/channels/" ), lResponse ) )
     {
-        lNumChannels = lResponse["num_channels"].asInt();
+        lNumChannels = lResponse.size();
     }
 
     return lNumChannels;
@@ -111,7 +111,7 @@ PVR_ERROR AminoPVRData::GetChannels( ADDON_HANDLE aHandle, bool aRadio )
 
     Json::Value lResponse;
 
-    if ( GrabAndParse( ConstructUrl( "/api/channels/getChannelList", g_SdOnly ? "includeHd=False" : "" ), lResponse ) )
+    if ( GrabAndParse( ConstructUrl( "/api/channels/", g_SdOnly ? "includeHd=False" : "" ), lResponse ) )
     {
         int lSize = lResponse.size();
 
@@ -132,16 +132,16 @@ PVR_ERROR AminoPVRData::GetChannels( ADDON_HANDLE aHandle, bool aRadio )
             lTag.bIsRadio       = lChannel.Radio;
             lTag.bIsHidden      = false;
 
-            strncpy( lTag.strChannelName, lChannel.Name.c_str(),     sizeof( lTag.strChannelName ) );
-            strncpy( lTag.strIconPath,    lChannel.LogoPath.c_str(), sizeof( lTag.strIconPath ) );
+            strncpy( lTag.strChannelName, lChannel.Name.c_str(),     sizeof( lTag.strChannelName ) - 1 );
+            strncpy( lTag.strIconPath,    lChannel.LogoPath.c_str(), sizeof( lTag.strIconPath ) - 1 );
 
             if ( lChannel.Url.compare( 0, 1, "/" ) == 0 )
             {
-                strncpy( lTag.strStreamURL, ConstructUrl( lChannel.Url, g_SdOnly ? "includeHd=False" : "" ).c_str(), sizeof( lTag.strStreamURL ) );
+                sprintf( lTag.strStreamURL, "http://%s:%d%s", g_strHostname.c_str(), g_iPort, ConstructUrl( lChannel.Url, g_SdOnly ? "includeHd=False" : "" ).c_str() );
             }
             else
             {
-                strncpy( lTag.strStreamURL, lChannel.Url.c_str(), sizeof( lTag.strStreamURL ) );
+                strncpy( lTag.strStreamURL, lChannel.Url.c_str(), sizeof( lTag.strStreamURL ) - 1 );
             }
 
             if ( !lTag.bIsRadio )
@@ -196,10 +196,12 @@ PVR_ERROR AminoPVRData::GetEPGForChannel( ADDON_HANDLE aHandle, const PVR_CHANNE
             continue;
 
         CStdString lPath;
-        lPath.Format( "/api/epg/getEpgForChannel/%i/%i/%i", lChannel.Id, aStart, aEnd );
+        CStdString lArguments;
+        lPath.Format( "/api/epg/%s/", lChannel.EpgId );
+        lArguments.Format( "startTime=%i&endTime=%i", aStart, aEnd );
         Json::Value lResponse;
 
-        if ( GrabAndParse( ConstructUrl( lPath ), lResponse ) )
+        if ( GrabAndParse( ConstructUrl( lPath, lArguments ), lResponse ) )
         {
             int lSize = lResponse.size();
 
@@ -259,9 +261,9 @@ int AminoPVRData::GetRecordingsAmount( void )
 {
     int         lNumRecordings = 0;
     Json::Value lResponse;
-    if ( GrabAndParse( ConstructUrl( "/api/recordings/getNumRecordings" ), lResponse ) )
+    if ( GrabAndParse( ConstructUrl( "/api/recordings/" ), lResponse ) )
     {
-        lNumRecordings = lResponse["num_recordings"].asInt();
+        lNumRecordings = lResponse.size();
     }
 
     return lNumRecordings;
@@ -272,7 +274,7 @@ PVR_ERROR AminoPVRData::GetRecordings( ADDON_HANDLE aHandle )
     XBMC->Log( LOG_DEBUG, "%s()", __FUNCTION__ );
 
     Json::Value lResponse;
-    if ( GrabAndParse( ConstructUrl( "/api/recordings/getRecordingList" ), lResponse ) )
+    if ( GrabAndParse( ConstructUrl( "/api/recordings/" ), lResponse ) )
     {
         int lSize = lResponse.size();
 
@@ -296,27 +298,27 @@ PVR_ERROR AminoPVRData::GetRecordings( ADDON_HANDLE aHandle )
             {
                 CStdString lTitle;
                 lTitle.Format( "%s: %s",    lRecording.EpgEntry.Title.c_str(),          lRecording.EpgEntry.Subtitle.c_str() );
-                strncpy( lTag.strTitle,     lTitle.c_str(),                             sizeof( lTag.strTitle ) );
-                strncpy( lTag.strDirectory, lRecording.EpgEntry.Title.c_str(),          sizeof( lTag.strDirectory ) );
+                strncpy( lTag.strTitle,     lTitle.c_str(),                             sizeof( lTag.strTitle ) - 1 );
+                strncpy( lTag.strDirectory, lRecording.EpgEntry.Title.c_str(),          sizeof( lTag.strDirectory ) - 1 );
             }
             else if ( lRecording.EpgEntry.Title.length() > 0 )
             {
-                strncpy( lTag.strTitle,     lRecording.EpgEntry.Title.c_str(),          sizeof( lTag.strTitle ) );
-                strncpy( lTag.strDirectory, lRecording.EpgEntry.Title.c_str(),          sizeof( lTag.strDirectory ) );
+                strncpy( lTag.strTitle,     lRecording.EpgEntry.Title.c_str(),          sizeof( lTag.strTitle ) - 1 );
+                strncpy( lTag.strDirectory, lRecording.EpgEntry.Title.c_str(),          sizeof( lTag.strDirectory ) - 1 );
             }
             else
             {
-                strncpy( lTag.strTitle,     lRecording.Title.c_str(),                   sizeof( lTag.strTitle ) );
-                strncpy( lTag.strDirectory, lRecording.Title.c_str(),                   sizeof( lTag.strDirectory ) );
+                strncpy( lTag.strTitle,     lRecording.Title.c_str(),                   sizeof( lTag.strTitle ) - 1 );
+                strncpy( lTag.strDirectory, lRecording.Title.c_str(),                   sizeof( lTag.strDirectory ) - 1 );
             }
 
-            strncpy( lTag.strPlot,          lRecording.EpgEntry.Description.c_str(),    sizeof( lTag.strPlot ) );
-            strncpy( lTag.strPlotOutline,   lRecording.EpgEntry.Description.c_str(),    sizeof( lTag.strPlotOutline ) );
-            strncpy( lTag.strChannelName,   lRecording.ChannelName.c_str(),             sizeof( lTag.strChannelName ) );
+            strncpy( lTag.strPlot,          lRecording.EpgEntry.Description.c_str(),    sizeof( lTag.strPlot ) - 1 );
+            strncpy( lTag.strPlotOutline,   lRecording.EpgEntry.Description.c_str(),    sizeof( lTag.strPlotOutline ) - 1 );
+            strncpy( lTag.strChannelName,   lRecording.ChannelName.c_str(),             sizeof( lTag.strChannelName ) - 1 );
 
             if ( g_UseHttpStreams )
             {
-                strncpy( lTag.strStreamURL, ConstructUrl( lRecording.Url ).c_str(),     sizeof( lTag.strStreamURL ) );
+                sprintf( lTag.strStreamURL, "http://%s:%d%s", g_strHostname.c_str(), g_iPort, ConstructUrl( lRecording.Url ).c_str() );
             }
             else
             {
@@ -349,9 +351,9 @@ PVR_ERROR AminoPVRData::DeleteRecording( const PVR_RECORDING & aRecording )
                 continue;
 
             CStdString lPath;
-            lPath.Format( "/api/recordings/deleteRecording/%i", lRecordingId );
+            lPath.Format( "/api/recordings/%i", lRecordingId );
             Json::Value lResponse;
-            if ( GrabAndParse( ConstructUrl( lPath ), lResponse, false ) )
+            if ( DeleteAndParse( ConstructUrl( lPath ), lResponse, false ) )
             {
                 ivRecordings.erase( ivRecordings.begin() + lRecordingPtr );
                 return PVR_ERROR_NO_ERROR;
@@ -379,10 +381,12 @@ PVR_ERROR AminoPVRData::SetRecordingLastPlayedPosition( const PVR_RECORDING & aR
             lRecording.Marker = aLastPlayedPosition;
 
             CStdString lPath;
-            lPath.Format( "/api/recordings/setRecordingMarker/%i/%i", lRecordingId, aLastPlayedPosition );
-            Json::Value lResponse;
+            lPath.Format( "/api/recordings/%i/marker", lRecordingId );
 
-            if ( GrabAndParse( ConstructUrl( lPath ), lResponse, false ) )
+            Json::Value lRequest;
+            Json::Value lResponse;
+            lRequest["marker"] = Json::Value( lRecording.Marker );
+            if ( PutAndParse( ConstructUrl( lPath ), lRequest, lResponse, false ) )
             {
                 return PVR_ERROR_NO_ERROR;
             }
@@ -562,7 +566,7 @@ int AminoPVRData::GetTimersAmount( void )
 
 PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
 {
-    XBMC->Log( LOG_DEBUG, "%s()", __FUNCTION__ );
+    XBMC->Log( LOG_NOTICE, "%s()", __FUNCTION__ );
 
     Json::Value lResponse;
     if ( GrabAndParse( ConstructUrl( "/api/timers/" ), lResponse ) )
@@ -740,12 +744,15 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                 
                     memset( &lTag, 0, sizeof( lTag ) );
 
-                    // Todo: this is a hack, we need unique iClientIndex, for now use a big offset
-                    lTag.iClientIndex       = 0xF000000 + lRecording.Id;
                     // When it is a schedule once timer, there is no parent, so only specify it for other types of timers
                     if ( lSchedule.Type != SCHEDULE_TYPE_ONCE )
                     {
+                        lTag.iClientIndex = 0x80000000 + lRecording.Id;
                         lTag.iParentClientIndex = lSchedule.Id;
+                    }
+                    else
+                    {
+                        lTag.iClientIndex = lSchedule.Id;
                     }
                     lTag.iTimerType         = lSchedule.Type;
                     if ( lSchedule.ChannelId != -1 )
@@ -782,21 +789,21 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                     {
                         CStdString lTitle;
                         lTitle.Format( "%s: %s",    lRecording.EpgEntry.Title.c_str(),          lRecording.EpgEntry.Subtitle.c_str() );
-                        strncpy( lTag.strTitle,     lTitle.c_str(),                             sizeof( lTag.strTitle ) );
-                        strncpy( lTag.strDirectory, lRecording.EpgEntry.Title.c_str(),          sizeof( lTag.strDirectory ) );
+                        strncpy( lTag.strTitle,     lTitle.c_str(),                             sizeof( lTag.strTitle ) - 1 );
+                        strncpy( lTag.strDirectory, lRecording.EpgEntry.Title.c_str(),          sizeof( lTag.strDirectory ) - 1 );
                     }
                     else if ( lRecording.EpgEntry.Title.length() > 0 )
                     {
-                        strncpy( lTag.strTitle,     lRecording.EpgEntry.Title.c_str(),          sizeof( lTag.strTitle ) );
-                        strncpy( lTag.strDirectory, lRecording.EpgEntry.Title.c_str(),          sizeof( lTag.strDirectory ) );
+                        strncpy( lTag.strTitle,     lRecording.EpgEntry.Title.c_str(),          sizeof( lTag.strTitle ) - 1 );
+                        strncpy( lTag.strDirectory, lRecording.EpgEntry.Title.c_str(),          sizeof( lTag.strDirectory ) - 1 );
                     }
                     else
                     {
-                        strncpy( lTag.strTitle,     lRecording.Title.c_str(),                   sizeof( lTag.strTitle ) );
-                        strncpy( lTag.strDirectory, lRecording.Title.c_str(),                   sizeof( lTag.strDirectory ) );
+                        strncpy( lTag.strTitle,     lRecording.Title.c_str(),                   sizeof( lTag.strTitle ) - 1 );
+                        strncpy( lTag.strDirectory, lRecording.Title.c_str(),                   sizeof( lTag.strDirectory ) - 1 );
                     }
 
-                    strncpy( lTag.strSummary,       lRecording.EpgEntry.Description.c_str(),    sizeof( lTag.strSummary ) );
+                    strncpy( lTag.strSummary,       lRecording.EpgEntry.Description.c_str(),    sizeof( lTag.strSummary ) - 1 );
 
                     switch ( lSchedule.Type )
                     {
@@ -949,6 +956,7 @@ PVR_ERROR AminoPVRData::AddTimer( const PVR_TIMER & aTimer )
 
     if ( PostAndParse( ConstructUrl( "/api/timers/" ), lJson, lResponse, false ) )
     {
+        PVR->TriggerTimerUpdate();
         return PVR_ERROR_NO_ERROR;
     }
 
@@ -957,8 +965,13 @@ PVR_ERROR AminoPVRData::AddTimer( const PVR_TIMER & aTimer )
 
 PVR_ERROR AminoPVRData::DeleteTimer( const PVR_TIMER & aTimer, bool aForceDelete )
 {
-    int lScheduleId = -1;
-    XBMC->Log( LOG_DEBUG, "%s( %d, %d )", __FUNCTION__, aTimer.iClientIndex, aForceDelete );
+    int lScheduleId = aTimer.iClientIndex;
+    if ( aTimer.iParentClientIndex != 0 )
+    {
+        lScheduleId = aTimer.iParentClientIndex;
+    }
+
+    XBMC->Log( LOG_INFO, "%s( %d, %d )", __FUNCTION__, lScheduleId, aForceDelete );
     for ( unsigned int lSchedulePtr = 0; lSchedulePtr < ivSchedules.size(); lSchedulePtr++ )
     {
         AminoPVRSchedule & lSchedule = ivSchedules.at( lSchedulePtr );
@@ -966,16 +979,18 @@ PVR_ERROR AminoPVRData::DeleteTimer( const PVR_TIMER & aTimer, bool aForceDelete
             continue;
 
         CStdString lPath;
-        lPath.Format( "/api/timers/%i", lScheduleId );
+        lPath.Format( "/api/timers/%i", lSchedule.Id );
         Json::Value lResponse;
-        if ( GrabAndParse( ConstructUrl( lPath ), lResponse, false ) )
+        if ( DeleteAndParse( ConstructUrl( lPath ), lResponse, false ) )
         {
+            Json::FastWriter lWriter;
             ivSchedules.erase( ivSchedules.begin() + lSchedulePtr );
+            PVR->TriggerTimerUpdate();
             return PVR_ERROR_NO_ERROR;
         }
     }
 
-    XBMC->Log( LOG_ERROR, "%s: could not find recording.\n", __FUNCTION__ );
+    XBMC->Log( LOG_ERROR, "%s: could not find timer.\n", __FUNCTION__ );
 
     return PVR_ERROR_SERVER_ERROR;
 }
@@ -1085,6 +1100,7 @@ bool AminoPVRData::PutAndParse( const CStdString aUrl, Json::Value aArguments, J
     }
     else
     {
+        lJson = lHttp.GetResponse()->GetResponseData();
         if ( ParseResponse( lJson, aResponse, aExpectData ) )
         {
             lResult = true;
@@ -1110,6 +1126,7 @@ bool AminoPVRData::DeleteAndParse( const CStdString aUrl, Json::Value & aRespons
     }
     else
     {
+        lJson = lHttp.GetResponse()->GetResponseData();
         if ( ParseResponse( lJson, aResponse, aExpectData ) )
         {
             lResult = true;
