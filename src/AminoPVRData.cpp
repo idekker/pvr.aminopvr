@@ -735,6 +735,10 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
                     lTag.iPreventDuplicateEpisodes = lSchedule.DupMethod;
                     lTag.firstDay = lSchedule.StartTime;
                     lTag.iEpgUid = PVR_TIMER_NO_EPG_UID;
+                    if ( lSchedule.EpgProgramId != -1 )
+                    {
+                        lTag.iEpgUid = lSchedule.EpgProgramId;
+                    }
                     lTag.iMarginStart = lSchedule.StartEarly / 60;
                     lTag.iMarginEnd = lSchedule.EndLate / 60;
                     lTag.iGenreType = 0;
@@ -906,7 +910,11 @@ PVR_ERROR AminoPVRData::GetTimers( ADDON_HANDLE aHandle )
 
                     lTag.iPreventDuplicateEpisodes = lSchedule.DupMethod;
                     lTag.firstDay       = lSchedule.StartTime;
-                    lTag.iEpgUid        = lRecording.EpgProgramId;
+                    lTag.iEpgUid        = PVR_TIMER_NO_EPG_UID;
+                    if ( lRecording.EpgProgramId != -1 )
+                    {
+                        lTag.iEpgUid = lRecording.EpgProgramId;
+                    }
                     lTag.iMarginStart   = lSchedule.StartEarly / 60;
                     lTag.iMarginEnd     = lSchedule.EndLate / 60;
                     lTag.iGenreType     = 0;
@@ -961,6 +969,11 @@ PVR_ERROR AminoPVRData::AddTimer( const PVR_TIMER & aTimer )
     lSchedule.PreferHd          = true;
     lSchedule.PreferUnscrambled = false;
     lSchedule.DupMethod         = (DuplicationType)aTimer.iPreventDuplicateEpisodes;
+    lSchedule.EpgProgramId = -1;
+    if ( aTimer.iEpgUid == PVR_TIMER_NO_EPG_UID )
+    {
+        lSchedule.EpgProgramId = aTimer.iEpgUid;
+    }
     switch ( aTimer.state )
     {
         case PVR_TIMER_STATE_DISABLED:
@@ -1286,6 +1299,7 @@ void AminoPVRData::CreateScheduleEntry( Json::Value aJson, AminoPVRSchedule & aS
     aSchedule.Id                   = aJson["id"].asInt();
     aSchedule.Type                 = (ScheduleType)aJson["type"].asInt();
     aSchedule.ChannelId            = aJson["channel_id"].asInt();
+    aSchedule.EpgProgramId         = aJson["epg_program_id"].asInt();
     aSchedule.StartTime            = aJson["start_time"].asInt();
     aSchedule.EndTime              = aJson["end_time"].asInt();
     aSchedule.Title                = aJson["title"].asString();
@@ -1295,6 +1309,15 @@ void AminoPVRData::CreateScheduleEntry( Json::Value aJson, AminoPVRSchedule & aS
     aSchedule.StartEarly           = aJson["start_early"].asInt();
     aSchedule.EndLate              = aJson["end_late"].asInt();
     aSchedule.Inactive             = aJson["inactive"].asBool();
+
+    if ( aSchedule.EpgProgramId != -1 )
+    {
+        CreateEpgEntry( aJson["epg_program"], aSchedule.EpgEntry );
+    }
+    else
+    {
+        aSchedule.EpgEntry.Title = aJson["title"].asString();
+    }
 }
 
 void AminoPVRData::CreateScheduleJson( AminoPVRSchedule aSchedule, Json::Value & aJson )
@@ -1302,6 +1325,7 @@ void AminoPVRData::CreateScheduleJson( AminoPVRSchedule aSchedule, Json::Value &
     aJson["id"]                 = Json::Value( aSchedule.Id );
     aJson["type"]               = Json::Value( aSchedule.Type );
     aJson["channel_id"]         = Json::Value( aSchedule.ChannelId );
+    aJson["epg_program_id"]     = Json::Value( aSchedule.EpgProgramId );
     aJson["start_time"]         = Json::Value( (int)aSchedule.StartTime );
     aJson["end_time"]           = Json::Value( (int)aSchedule.EndTime );
     aJson["title"]              = Json::Value( aSchedule.Title.c_str() );

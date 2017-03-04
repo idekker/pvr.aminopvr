@@ -46,7 +46,8 @@ enum ScheduleType
     SCHEDULE_TYPE_MANUAL_EVERY_DAY     = 7,
     SCHEDULE_TYPE_MANUAL_EVERY_WEEKDAY = 8,
     SCHEDULE_TYPE_MANUAL_EVERY_WEEKEND = 9,
-    SCHEDULE_TYPE_MANUAL_EVERY_WEEK    = 10
+    SCHEDULE_TYPE_MANUAL_EVERY_WEEK    = 10,
+    SCHEDULE_TYPE_MANUAL_ONCE          = 11
 };
 
 enum DuplicationType
@@ -111,6 +112,8 @@ struct AminoPVRSchedule
     int                 Id;
     ScheduleType        Type;
     int                 ChannelId;
+    int                 EpgProgramId;
+    AminoPVREpgEntry    EpgEntry;
     time_t              StartTime;
     time_t              EndTime;
     CStdString          Title;
