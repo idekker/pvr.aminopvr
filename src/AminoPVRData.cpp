@@ -90,6 +90,11 @@ PVR_ERROR AminoPVRData::GetGeneralConfig()
     return PVR_ERROR_NO_ERROR;
 }
 
+int AminoPVRData::GetRtspPort()
+{
+    return ivRtspPort;
+}
+
 int AminoPVRData::GetChannelsAmount( void )
 {
     int         lNumChannels = 0;
@@ -134,15 +139,6 @@ PVR_ERROR AminoPVRData::GetChannels( ADDON_HANDLE aHandle, bool aRadio )
 
             strncpy( lTag.strChannelName, lChannel.Name.c_str(),     sizeof( lTag.strChannelName ) - 1 );
             strncpy( lTag.strIconPath,    lChannel.LogoPath.c_str(), sizeof( lTag.strIconPath ) - 1 );
-
-            if ( lChannel.Url.compare( 0, 1, "/" ) == 0 )
-            {
-                sprintf( lTag.strStreamURL, "http://%s:%d%s", g_strHostname.c_str(), g_iPort, ConstructUrl( lChannel.Url, g_SdOnly ? "includeHd=False" : "" ).c_str() );
-            }
-            else
-            {
-                strncpy( lTag.strStreamURL, lChannel.Url.c_str(), sizeof( lTag.strStreamURL ) - 1 );
-            }
 
             if ( !lTag.bIsRadio )
             {
@@ -222,7 +218,7 @@ PVR_ERROR AminoPVRData::GetEPGForChannel( ADDON_HANDLE aHandle, const PVR_CHANNE
                 lTag.startTime          = lEpgEntry.StartTime;
                 lTag.endTime            = lEpgEntry.EndTime;
                 lTag.strEpisodeName     = lEpgEntry.Subtitle.c_str();
-                lTag.iChannelNumber     = lChannel.Id;
+                lTag.iUniqueChannelId   = lChannel.Id;
                 lTag.strPlotOutline     = lEpgEntry.Description.c_str();
                 lTag.strPlot            = lEpgEntry.Description.c_str();
                 lTag.strIconPath        = "";
@@ -316,16 +312,7 @@ PVR_ERROR AminoPVRData::GetRecordings( ADDON_HANDLE aHandle )
             strncpy( lTag.strPlotOutline,   lRecording.EpgEntry.Description.c_str(),    sizeof( lTag.strPlotOutline ) - 1 );
             strncpy( lTag.strChannelName,   lRecording.ChannelName.c_str(),             sizeof( lTag.strChannelName ) - 1 );
 
-            if ( g_UseHttpStreams )
-            {
-                sprintf( lTag.strStreamURL, "http://%s:%d%s", g_strHostname.c_str(), g_iPort, ConstructUrl( lRecording.Url ).c_str() );
-            }
-            else
-            {
-                sprintf( lTag.strStreamURL, "rtsp://%s:%d/%s", g_strHostname.c_str(), ivRtspPort, lRecording.Filename.c_str() );
-            }
-
-            XBMC->Log( LOG_DEBUG, "Found recording: %s, Unique id: %s, url: %s\n", lRecording.Title.c_str(), lTag.strRecordingId, lTag.strStreamURL );
+            XBMC->Log( LOG_DEBUG, "Found recording: %s, Unique id: %s\n", lRecording.Title.c_str(), lTag.strRecordingId );
 
             ivRecordings.push_back( lRecording );   //Local cache...
 
@@ -336,6 +323,37 @@ PVR_ERROR AminoPVRData::GetRecordings( ADDON_HANDLE aHandle )
     }
 
     return PVR_ERROR_SERVER_ERROR;
+}
+
+bool AminoPVRData::GetRecording( const PVR_RECORDING & aRecording, AminoPVRRecording & aMyRecording )
+{
+    for ( unsigned int lRecordingPtr = 0; lRecordingPtr < ivRecordings.size(); lRecordingPtr++ )
+    {
+        AminoPVRRecording & lThisRecording = ivRecordings.at( lRecordingPtr );
+        string recordingId = to_string( lThisRecording.Id );
+        if ( recordingId.compare( aRecording.strRecordingId ) == 0 )
+        {
+            aMyRecording.Id           = lThisRecording.Id;
+            aMyRecording.ScheduleId   = lThisRecording.ScheduleId;
+            aMyRecording.StartTime    = lThisRecording.StartTime;
+            aMyRecording.EndTime      = lThisRecording.EndTime;
+            aMyRecording.Title        = lThisRecording.Title;
+            aMyRecording.ChannelId    = lThisRecording.ChannelId;
+            aMyRecording.ChannelName  = lThisRecording.ChannelName;
+            aMyRecording.Url          = lThisRecording.Url;
+            aMyRecording.Filename     = lThisRecording.Filename;
+            aMyRecording.FileSize     = lThisRecording.FileSize;
+            aMyRecording.Scrambled    = lThisRecording.Scrambled;
+            aMyRecording.Marker       = lThisRecording.Marker;
+            aMyRecording.Status       = lThisRecording.Status;
+            aMyRecording.EpgProgramId = lThisRecording.EpgProgramId;
+            aMyRecording.EpgEntry     = lThisRecording.EpgEntry;
+
+            return true;
+        }
+    }
+
+    return false;
 }
 
 PVR_ERROR AminoPVRData::DeleteRecording( const PVR_RECORDING & aRecording )
@@ -455,7 +473,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[1].iPrioritiesSize = 0;
     types[1].iLifetimesSize = 0;
     types[1].iPreventDuplicateEpisodesSize = 8;
-    memcpy_s( types[1].preventDuplicateEpisodes, sizeof( types[1].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    memcpy( types[1].preventDuplicateEpisodes, types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
     types[1].iPreventDuplicateEpisodesDefault = 0;
     types[1].iRecordingGroupSize = 0;
     types[1].iMaxRecordingsSize = 0;
@@ -466,7 +484,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[2].iPrioritiesSize = 0;
     types[2].iLifetimesSize = 0;
     types[2].iPreventDuplicateEpisodesSize = 8;
-    memcpy_s( types[2].preventDuplicateEpisodes, sizeof( types[2].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    memcpy( types[2].preventDuplicateEpisodes, types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
     types[2].iPreventDuplicateEpisodesDefault = 0;
     types[2].iRecordingGroupSize = 0;
     types[2].iMaxRecordingsSize = 0;
@@ -477,7 +495,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[3].iPrioritiesSize = 0;
     types[3].iLifetimesSize = 0;
     types[3].iPreventDuplicateEpisodesSize = 8;
-    memcpy_s( types[3].preventDuplicateEpisodes, sizeof( types[3].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    memcpy( types[3].preventDuplicateEpisodes, types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
     types[3].iPreventDuplicateEpisodesDefault = 0;
     types[3].iRecordingGroupSize = 0;
     types[3].iMaxRecordingsSize = 0;
@@ -488,7 +506,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[4].iPrioritiesSize = 0;
     types[4].iLifetimesSize = 0;
     types[4].iPreventDuplicateEpisodesSize = 8;
-    memcpy_s( types[4].preventDuplicateEpisodes, sizeof( types[4].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    memcpy( types[4].preventDuplicateEpisodes, types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
     types[4].iPreventDuplicateEpisodesDefault = 0;
     types[4].iRecordingGroupSize = 0;
     types[4].iMaxRecordingsSize = 0;
@@ -499,7 +517,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[5].iPrioritiesSize = 0;
     types[5].iLifetimesSize = 0;
     types[5].iPreventDuplicateEpisodesSize = 8;
-    memcpy_s( types[5].preventDuplicateEpisodes, sizeof( types[5].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    memcpy( types[5].preventDuplicateEpisodes, types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
     types[5].iPreventDuplicateEpisodesDefault = 0;
     types[5].iRecordingGroupSize = 0;
     types[5].iMaxRecordingsSize = 0;
@@ -510,7 +528,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[6].iPrioritiesSize = 0;
     types[6].iLifetimesSize = 0;
     types[6].iPreventDuplicateEpisodesSize = 8;
-    memcpy_s( types[6].preventDuplicateEpisodes, sizeof( types[6].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    memcpy( types[6].preventDuplicateEpisodes, types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
     types[6].iPreventDuplicateEpisodesDefault = 0;
     types[6].iRecordingGroupSize = 0;
     types[6].iMaxRecordingsSize = 0;
@@ -521,7 +539,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[7].iPrioritiesSize = 0;
     types[7].iLifetimesSize = 0;
     types[7].iPreventDuplicateEpisodesSize = 8;
-    memcpy_s( types[7].preventDuplicateEpisodes, sizeof( types[7].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    memcpy( types[7].preventDuplicateEpisodes, types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
     types[7].iPreventDuplicateEpisodesDefault = 0;
     types[7].iRecordingGroupSize = 0;
     types[7].iMaxRecordingsSize = 0;
@@ -532,7 +550,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[8].iPrioritiesSize = 0;
     types[8].iLifetimesSize = 0;
     types[8].iPreventDuplicateEpisodesSize = 8;
-    memcpy_s( types[8].preventDuplicateEpisodes, sizeof( types[8].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    memcpy( types[8].preventDuplicateEpisodes, types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
     types[8].iPreventDuplicateEpisodesDefault = 0;
     types[8].iRecordingGroupSize = 0;
     types[8].iMaxRecordingsSize = 0;
@@ -543,7 +561,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[9].iPrioritiesSize = 0;
     types[9].iLifetimesSize = 0;
     types[9].iPreventDuplicateEpisodesSize = 8;
-    memcpy_s( types[9].preventDuplicateEpisodes, sizeof( types[9].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    memcpy( types[9].preventDuplicateEpisodes, types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
     types[9].iPreventDuplicateEpisodesDefault = 0;
     types[9].iRecordingGroupSize = 0;
     types[9].iMaxRecordingsSize = 0;
@@ -554,7 +572,7 @@ PVR_ERROR AminoPVRData::GetTimerTypes(PVR_TIMER_TYPE types[], int *size)
     types[10].iPrioritiesSize = 0;
     types[10].iLifetimesSize = 0;
     types[10].iPreventDuplicateEpisodesSize = 8;
-    memcpy_s( types[10].preventDuplicateEpisodes, sizeof( types[10].preventDuplicateEpisodes ), types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
+    memcpy( types[10].preventDuplicateEpisodes, types[0].preventDuplicateEpisodes, sizeof( types[0].preventDuplicateEpisodes ) );
     types[10].iPreventDuplicateEpisodesDefault = 0;
     types[10].iRecordingGroupSize = 0;
     types[10].iMaxRecordingsSize = 0;

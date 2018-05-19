@@ -139,6 +139,7 @@ public:
 
     virtual int       GetRecordingsAmount           ( void );
     virtual PVR_ERROR GetRecordings                 ( ADDON_HANDLE aHandle );
+    virtual bool      GetRecording                  ( const PVR_RECORDING & aRecording, AminoPVRRecording & aMyRecording );
     virtual PVR_ERROR DeleteRecording               ( const PVR_RECORDING & aRecording );
     virtual PVR_ERROR SetRecordingLastPlayedPosition( const PVR_RECORDING & aRecording, int aLastPlayedPosition );
     virtual int       GetRecordingLastPlayedPosition( const PVR_RECORDING & aRecording );
@@ -150,11 +151,13 @@ public:
     virtual PVR_ERROR DeleteTimer( const PVR_TIMER & timer, bool bForceDelete );
     virtual PVR_ERROR UpdateTimer( const PVR_TIMER & timer );
 
+    virtual CStdString ConstructUrl( const CStdString aPath, const CStdString aArguments="", bool aUseApiKey=true );
+    virtual int        GetRtspPort();
+
 protected:
 private:
     PVR_ERROR  GetGeneralConfig();
 
-    CStdString ConstructUrl( const CStdString aPath, const CStdString aArguments="", bool aUseApiKey=true );
     bool       GrabAndParse( const CStdString aUrl, Json::Value & aResponse, bool aExpectData=true );
     bool       PostAndParse( const CStdString aUrl, Json::Value aArguments, Json::Value & aResponse, bool aExpectData=true );
     bool       PutAndParse( const CStdString aUrl, Json::Value aArguments, Json::Value & aResponse, bool aExpectData = true );
